@@ -38,7 +38,7 @@
   let ws = null;
   let nickname = '';
   let reconnectAttempts = 0;
-  const MAX_RECONNECT = 5;
+  const MAX_RECONNECT = 20;
   let notificationsEnabled = false;
   let expiresAt = null;
   let countdownInterval = null;
@@ -49,6 +49,44 @@
   let recTimerInterval = null;
   let _activeStream = null;
   const MAX_AUDIO_DURATION = 120;
+  let _swRegistration = null;
+  let _wakeLockRef = null;
+
+  // --- Service Worker registration ---
+  async function registerSW() {
+    if ('serviceWorker' in navigator) {
+      try {
+        _swRegistration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      } catch { /* SW not supported or failed */ }
+    }
+  }
+  registerSW();
+
+  // --- Web Lock: keeps page alive in background ---
+  function acquireWebLock() {
+    if (navigator.locks) {
+      navigator.locks.request('deafchat-keepalive-' + roomId, { mode: 'exclusive', ifAvailable: false }, () => {
+        // This promise never resolves → lock is held for the lifetime of the page
+        return new Promise(() => {});
+      }).catch(() => {});
+    }
+  }
+
+  // --- Wake Lock: prevents screen/CPU sleep on mobile ---
+  async function acquireWakeLock() {
+    if ('wakeLock' in navigator) {
+      try {
+        _wakeLockRef = await navigator.wakeLock.request('screen');
+        _wakeLockRef.addEventListener('release', () => { _wakeLockRef = null; });
+      } catch { /* wake lock not available */ }
+    }
+  }
+  // Re-acquire wake lock when tab becomes visible
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && !_wakeLockRef) {
+      acquireWakeLock();
+    }
+  });
 
   // --- Utils ---
   function showToast(msg, type = 'info') {
@@ -102,6 +140,20 @@
     if (!notificationsEnabled || !canNotify() || Notification.permission !== 'granted') return;
     // Only notify when tab is not focused
     if (document.hasFocus()) return;
+
+    // Prefer Service Worker notifications (work better in background / screen off)
+    if (_swRegistration && _swRegistration.active) {
+      _swRegistration.active.postMessage({
+        type: 'SHOW_NOTIFICATION',
+        title: senderNick,
+        body: content.length > 100 ? content.slice(0, 100) + '…' : content,
+        tag: 'deafchat-' + roomId,
+        url: window.location.pathname,
+      });
+      return;
+    }
+
+    // Fallback: direct Notification API
     try {
       const n = new Notification(senderNick, {
         body: content.length > 100 ? content.slice(0, 100) + '…' : content,
@@ -113,7 +165,6 @@
         window.focus();
         n.close();
       });
-      // Auto-close after 5s
       setTimeout(() => n.close(), 5000);
     } catch { /* some environments block new Notification() */ }
   }
@@ -193,7 +244,8 @@
             ws.send(JSON.stringify({
               type: 'audio',
               audio_data: base64,
-              audio_duration: duration
+              audio_duration: duration,
+              audio_mime: mimeType || 'audio/webm'
             }));
           }
         };
@@ -397,10 +449,11 @@
     wrapper.className = `dc-msg ${isMe ? 'dc-msg-mine' : 'dc-msg-other'}`;
 
     // Decode base64 → blob → object URL
+    const audioMime = msg.audio_mime || 'audio/webm';
     const raw = atob(msg.audio_data);
     const buf = new Uint8Array(raw.length);
     for (let i = 0; i < raw.length; i++) buf[i] = raw.charCodeAt(i);
-    const blob = new Blob([buf], { type: 'audio/webm' });
+    const blob = new Blob([buf], { type: audioMime });
     const url = URL.createObjectURL(blob);
 
     const dur = msg.audio_duration || 0;
@@ -554,6 +607,8 @@
     chatApp.hidden = false;
     messageInput.focus();
     connectWS();
+    acquireWebLock();
+    acquireWakeLock();
   });
 
   messageForm.addEventListener('submit', (e) => {
@@ -633,6 +688,26 @@
       } catch { localStorage.removeItem('deafchat_nickname'); }
     }
   } catch {}
+
+  // --- Reconnect when tab becomes visible again ---
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && nickname) {
+      // If WS is closed or closing, reconnect
+      if (!ws || ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
+        reconnectAttempts = 0;
+        showToast('Riconnessione in corso…', 'info');
+        connectWS();
+      }
+    }
+  });
+
+  // --- Keep-alive ping to prevent idle disconnection ---
+  setInterval(() => {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      // Send a no-op to keep the connection alive
+      try { ws.send(JSON.stringify({ type: 'message', content: '' })); } catch {}
+    }
+  }, 25000);
 
   loadRoomInfo();
 })();

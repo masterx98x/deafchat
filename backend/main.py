@@ -9,6 +9,7 @@ from fastapi import FastAPI, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.responses import FileResponse
 from pathlib import Path
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -78,6 +79,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "img-src 'self' data:; "
             "media-src 'self' blob:; "
             "connect-src 'self' ws: wss:; "
+            "worker-src 'self'; "
             "frame-ancestors 'none'"
         )
         return response
@@ -150,6 +152,16 @@ async def websocket_endpoint(ws: WebSocket, room_id: str):
 
 
 # ---------- Frontend (HTML pages) ----------
+
+@app.get("/sw.js")
+async def service_worker():
+    sw_path = FRONTEND_DIR / "sw.js"
+    return FileResponse(
+        path=str(sw_path),
+        media_type="application/javascript",
+        headers={"Service-Worker-Allowed": "/", "Cache-Control": "no-cache"},
+    )
+
 
 @app.get("/", response_class=HTMLResponse)
 async def landing_page():

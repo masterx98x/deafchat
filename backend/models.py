@@ -59,6 +59,7 @@ class WSIncoming(BaseModel):
     content: str = ""
     audio_data: str = ""
     audio_duration: float = 0
+    audio_mime: str = ""
 
 
 class WSOutgoing(BaseModel):
@@ -68,5 +69,6 @@ class WSOutgoing(BaseModel):
     content: str = ""
     audio_data: str = ""
     audio_duration: float = 0
+    audio_mime: str = ""
     timestamp: str = ""
     members: list[str] = Field(default_factory=list)

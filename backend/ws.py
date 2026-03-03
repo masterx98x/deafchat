@@ -222,6 +222,7 @@ async def handle_websocket(ws: WebSocket, room_id: str) -> None:
                         nickname=nickname,
                         audio_data=audio_data,
                         audio_duration=incoming.audio_duration,
+                        audio_mime=incoming.audio_mime,
                         timestamp=_now_iso(),
                     ),
                 )
