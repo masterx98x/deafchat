@@ -3,10 +3,71 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DeafChat – Chat temporanea e privata</title>
-  <meta name="description" content="Chat temporanea, senza registrazione, effimera e orientata alla privacy. Parte del laboratorio DeafSuite." />
+
+  <!-- Primary SEO -->
+  <title>DeafChat – Chat temporanea, anonima e privata | Senza registrazione</title>
+  <meta name="description" content="DeafChat è una chat temporanea, anonima e senza registrazione. Crea una stanza, condividi il link e chatta in modo sicuro. Zero tracce, zero dati salvati. Parte del laboratorio DeafSuite." />
+  <meta name="keywords" content="chat temporanea, chat anonima, chat senza registrazione, chat privata, chat effimera, messaggi che si autodistruggono, chat sicura, DeafChat, DeafSuite" />
+  <meta name="author" content="DeafSuite" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://deafchat.deafnews.it/" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://deafchat.deafnews.it/" />
+  <meta property="og:title" content="DeafChat – Chat temporanea, anonima e privata" />
+  <meta property="og:description" content="Crea una stanza in un click e chatta in modo sicuro. Nessun account, nessun dato salvato. Quando la stanza scade, tutto sparisce." />
+  <meta property="og:image" content="https://deafchat.deafnews.it/static/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:site_name" content="DeafChat" />
+  <meta property="og:locale" content="it_IT" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="DeafChat – Chat temporanea, anonima e privata" />
+  <meta name="twitter:description" content="Chat effimera senza registrazione. Crea una stanza, condividi il link. Zero tracce." />
+  <meta name="twitter:image" content="https://deafchat.deafnews.it/static/og-image.png" />
+
+  <!-- Favicon & theme -->
   <link rel="icon" href="/static/favicon.png" type="image/png" />
-  <link rel="stylesheet" href="/static/css/style.css?v=2" />
+  <link rel="apple-touch-icon" href="/static/favicon.png" />
+  <meta name="theme-color" content="#020617" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "DeafChat",
+    "url": "https://deafchat.deafnews.it/",
+    "description": "Chat temporanea, anonima e senza registrazione. Messaggi effimeri che si autodistruggono.",
+    "applicationCategory": "CommunicationApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "EUR"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "DeafSuite",
+      "url": "https://www.deafsuite.it/"
+    },
+    "featureList": [
+      "Chat senza registrazione",
+      "Messaggi effimeri con autodistruzione",
+      "Stanze con link condivisibile",
+      "Nessun dato salvato su disco",
+      "Audiomessaggi in tempo reale",
+      "Chat di gruppo e private"
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="/static/css/style.css?v=3" />
 </head>
 <body class="dc-body">
   <header class="dc-header">
@@ -23,10 +84,11 @@
     <div class="dc-container">
       <!-- Hero section -->
       <section class="dc-hero" aria-label="Crea una nuova chat">
-        <h2 class="dc-hero-title">Comunica senza lasciare tracce</h2>
+        <h2 class="dc-hero-title">Chat temporanea e anonima: comunica senza lasciare tracce</h2>
         <p class="dc-hero-desc">
           Crea una stanza in un click, condividi il link e chatta in modo sicuro.
           Nessun account, nessun dato salvato. Quando la stanza scade, tutto sparisce.
+          Perfetta per conversazioni riservate, riunioni rapide e messaggi che si autodistruggono.
         </p>
 
         <form id="create-room-form" class="dc-create-form" aria-label="Crea stanza">
@@ -118,22 +180,114 @@
 
       <!-- Features -->
       <section class="dc-features" aria-label="Caratteristiche">
-        <div class="dc-feature">
+        <article class="dc-feature">
           <span class="dc-feature-icon" aria-hidden="true">⏳</span>
-          <h3>Effimera</h3>
-          <p>Scegli tu il timer: 5 min, 15 min, 30 min, 1 ora o 2 ore. Poi tutto sparisce.</p>
-        </div>
-        <div class="dc-feature">
+          <h3>Chat effimera</h3>
+          <p>Scegli il timer di autodistruzione: 5 min, 15 min, 30 min, 1 ora o 2 ore. Allo scadere, la stanza e tutti i messaggi spariscono per sempre.</p>
+        </article>
+        <article class="dc-feature">
           <span class="dc-feature-icon" aria-hidden="true">🔐</span>
           <h3>Senza registrazione</h3>
-          <p>Nessun account, nessuna email. Scegli un nickname e inizia a chattare.</p>
-        </div>
-        <div class="dc-feature">
+          <p>Nessun account, nessuna email, nessun numero di telefono. Scegli un nickname e inizia a chattare in totale anonimato.</p>
+        </article>
+        <article class="dc-feature">
           <span class="dc-feature-icon" aria-hidden="true">🗑️</span>
           <h3>Zero tracce</h3>
-          <p>I messaggi vivono solo in memoria. Nulla viene salvato su disco.</p>
+          <p>I messaggi vivono solo in memoria RAM. Nessun database, nessun log, nulla viene salvato su disco. Privacy garantita.</p>
+        </article>
+        <article class="dc-feature">
+          <span class="dc-feature-icon" aria-hidden="true">🎤</span>
+          <h3>Audiomessaggi</h3>
+          <p>Invia note vocali in tempo reale. Registra e ascolta direttamente nella chat, senza app esterne.</p>
+        </article>
+        <article class="dc-feature">
+          <span class="dc-feature-icon" aria-hidden="true">🔗</span>
+          <h3>Link condivisibile</h3>
+          <p>Condividi un semplice link per invitare chiunque nella tua stanza. Nessuna installazione richiesta.</p>
+        </article>
+        <article class="dc-feature">
+          <span class="dc-feature-icon" aria-hidden="true">📱</span>
+          <h3>Mobile-first</h3>
+          <p>Funziona perfettamente su smartphone, tablet e desktop. Design reattivo e ottimizzato per ogni schermo.</p>
+        </article>
+      </section>
+
+      <!-- FAQ Section (SEO + Schema) -->
+      <section class="dc-faq" aria-label="Domande frequenti">
+        <h2 class="dc-faq-title">Domande frequenti</h2>
+        <div class="dc-faq-list">
+          <details class="dc-faq-item">
+            <summary class="dc-faq-question">DeafChat è gratuito?</summary>
+            <p class="dc-faq-answer">Sì, DeafChat è completamente gratuito e non richiede alcuna registrazione.</p>
+          </details>
+          <details class="dc-faq-item">
+            <summary class="dc-faq-question">Come funziona l'autodistruzione dei messaggi?</summary>
+            <p class="dc-faq-answer">Quando crei una stanza scegli un timer (da 5 minuti a 2 ore). Allo scadere del tempo, la stanza e tutti i messaggi vengono cancellati dalla memoria del server. Non esiste modo di recuperarli.</p>
+          </details>
+          <details class="dc-faq-item">
+            <summary class="dc-faq-question">I miei messaggi sono salvati da qualche parte?</summary>
+            <p class="dc-faq-answer">No. I messaggi esistono solo nella RAM del server durante la sessione. Non c'è nessun database, nessun log e nessun backup. Quando la stanza scade, tutto sparisce.</p>
+          </details>
+          <details class="dc-faq-item">
+            <summary class="dc-faq-question">Devo installare un'app?</summary>
+            <p class="dc-faq-answer">No, DeafChat funziona direttamente nel browser. Basta aprire il link e iniziare a chattare. Funziona su qualsiasi dispositivo con un browser moderno.</p>
+          </details>
+          <details class="dc-faq-item">
+            <summary class="dc-faq-question">Posso inviare messaggi vocali?</summary>
+            <p class="dc-faq-answer">Sì! Puoi registrare e inviare audiomessaggi direttamente nella chat. Serve HTTPS e il permesso del microfono nel browser.</p>
+          </details>
         </div>
       </section>
+
+      <!-- FAQ Schema (JSON-LD) -->
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "DeafChat è gratuito?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sì, DeafChat è completamente gratuito e non richiede alcuna registrazione."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Come funziona l'autodistruzione dei messaggi?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Quando crei una stanza scegli un timer (da 5 minuti a 2 ore). Allo scadere del tempo, la stanza e tutti i messaggi vengono cancellati dalla memoria del server."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "I miei messaggi sono salvati da qualche parte?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. I messaggi esistono solo nella RAM del server. Non c'è nessun database, nessun log e nessun backup."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Devo installare un'app?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No, DeafChat funziona direttamente nel browser su qualsiasi dispositivo."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Posso inviare messaggi vocali?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sì, puoi registrare e inviare audiomessaggi direttamente nella chat."
+            }
+          }
+        ]
+      }
+      </script>
     </div>
   </main>
 

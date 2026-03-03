@@ -163,6 +163,18 @@ async def service_worker():
     )
 
 
+@app.get("/robots.txt")
+async def robots_txt():
+    robots_path = FRONTEND_DIR / "robots.txt"
+    return FileResponse(path=str(robots_path), media_type="text/plain")
+
+
+@app.get("/sitemap.xml")
+async def sitemap_xml():
+    sitemap_path = FRONTEND_DIR / "sitemap.xml"
+    return FileResponse(path=str(sitemap_path), media_type="application/xml")
+
+
 @app.get("/", response_class=HTMLResponse)
 async def landing_page():
     html_path = FRONTEND_DIR / "index.html"

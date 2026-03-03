@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /ws/
+Disallow: /health
+
+Sitemap: https://deafchat.deafnews.it/sitemap.xml
