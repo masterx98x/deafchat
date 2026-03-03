@@ -404,9 +404,12 @@
     const url = URL.createObjectURL(blob);
 
     const dur = msg.audio_duration || 0;
-    const durLabel = dur > 0
-      ? `${Math.floor(dur / 60)}:${(dur % 60).toString().padStart(2, '0')}`
-      : '';
+
+    function fmtDur(s) {
+      const m = Math.floor(s / 60);
+      const sec = Math.floor(s % 60);
+      return `${m}:${sec.toString().padStart(2, '0')}`;
+    }
 
     const bubble = document.createElement('div');
     bubble.className = 'dc-msg-bubble dc-msg-audio-bubble';
@@ -418,26 +421,42 @@
       bubble.appendChild(nickEl);
     }
 
+    // Custom audio player
     const player = document.createElement('div');
     player.className = 'dc-audio-player';
-    const icon = document.createElement('span');
-    icon.className = 'dc-audio-icon';
-    icon.setAttribute('aria-hidden', 'true');
-    icon.textContent = '\uD83C\uDFA4';
-    player.appendChild(icon);
 
-    const audio = document.createElement('audio');
-    audio.controls = true;
-    audio.preload = 'metadata';
-    audio.src = url;
-    player.appendChild(audio);
+    const playBtn = document.createElement('button');
+    playBtn.className = 'dc-audio-play-btn';
+    playBtn.setAttribute('aria-label', 'Play audio');
+    playBtn.innerHTML = `<svg class="dc-audio-icon-play" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>`;
+    player.appendChild(playBtn);
 
-    if (durLabel) {
-      const durEl = document.createElement('span');
-      durEl.className = 'dc-audio-duration';
-      durEl.textContent = durLabel;
-      player.appendChild(durEl);
-    }
+    const trackWrap = document.createElement('div');
+    trackWrap.className = 'dc-audio-track-wrap';
+
+    // Waveform bars (decorative)
+    const waveform = document.createElement('div');
+    waveform.className = 'dc-audio-waveform';
+    const barHeights = [35,55,40,70,50,80,45,65,55,75,40,60,50,70,45,55,65,50,40,60,55,70,45,50,35];
+    barHeights.forEach(h => {
+      const bar = document.createElement('div');
+      bar.className = 'dc-audio-bar';
+      bar.style.height = h + '%';
+      waveform.appendChild(bar);
+    });
+    trackWrap.appendChild(waveform);
+
+    // Progress overlay
+    const progress = document.createElement('div');
+    progress.className = 'dc-audio-progress';
+    trackWrap.appendChild(progress);
+
+    player.appendChild(trackWrap);
+
+    const durEl = document.createElement('span');
+    durEl.className = 'dc-audio-duration';
+    durEl.textContent = fmtDur(dur);
+    player.appendChild(durEl);
 
     bubble.appendChild(player);
 
@@ -449,6 +468,56 @@
     wrapper.appendChild(bubble);
     messagesDiv.appendChild(wrapper);
     scrollToBottom();
+
+    // Hidden audio element for playback
+    const audio = new Audio(url);
+    audio.preload = 'metadata';
+    let playing = false;
+
+    playBtn.addEventListener('click', () => {
+      if (playing) {
+        audio.pause();
+      } else {
+        audio.play();
+      }
+    });
+
+    audio.addEventListener('play', () => {
+      playing = true;
+      playBtn.innerHTML = `<svg class="dc-audio-icon-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="3" width="4" height="18" rx="1"/><rect x="15" y="3" width="4" height="18" rx="1"/></svg>`;
+      playBtn.classList.add('dc-audio-playing');
+    });
+
+    audio.addEventListener('pause', () => {
+      playing = false;
+      playBtn.innerHTML = `<svg class="dc-audio-icon-play" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>`;
+      playBtn.classList.remove('dc-audio-playing');
+    });
+
+    audio.addEventListener('ended', () => {
+      playing = false;
+      playBtn.innerHTML = `<svg class="dc-audio-icon-play" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>`;
+      playBtn.classList.remove('dc-audio-playing');
+      progress.style.width = '0%';
+      durEl.textContent = fmtDur(dur);
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      if (audio.duration) {
+        const pct = (audio.currentTime / audio.duration) * 100;
+        progress.style.width = pct + '%';
+        durEl.textContent = fmtDur(audio.currentTime);
+      }
+    });
+
+    // Click on waveform to seek
+    trackWrap.addEventListener('click', (e) => {
+      if (!audio.duration) return;
+      const rect = trackWrap.getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      audio.currentTime = pct * audio.duration;
+      if (!playing) audio.play();
+    });
 
     if (!isMe) sendBrowserNotification(msg.nickname, '\uD83C\uDFA4 Audiomessaggio');
   }
