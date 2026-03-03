@@ -172,7 +172,11 @@ async def robots_txt():
 @app.get("/sitemap.xml")
 async def sitemap_xml():
     sitemap_path = FRONTEND_DIR / "sitemap.xml"
-    return FileResponse(path=str(sitemap_path), media_type="application/xml")
+    return FileResponse(
+        path=str(sitemap_path),
+        media_type="application/xml",
+        headers={"Content-Security-Policy": "default-src 'self'; style-src 'self' 'unsafe-inline'"},
+    )
 
 
 @app.get("/", response_class=HTMLResponse)
