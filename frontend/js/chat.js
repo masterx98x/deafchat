@@ -133,7 +133,7 @@
 
   // --- Audio Recording ---
   function canRecord() {
-    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && typeof MediaRecorder !== 'undefined');
   }
 
   function formatRecTime(seconds) {
@@ -152,7 +152,11 @@
 
   async function startRecording() {
     if (!canRecord()) {
-      showToast('Il tuo browser non supporta la registrazione audio.', 'warning');
+      if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        showToast('Gli audiomessaggi richiedono HTTPS. Chiedi all\'admin di abilitare SSL.', 'warning');
+      } else {
+        showToast('Il tuo browser non supporta la registrazione audio.', 'warning');
+      }
       return;
     }
     try {
