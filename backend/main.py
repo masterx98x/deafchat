@@ -71,17 +71,19 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         )
         # S9: request tracing
         response.headers["X-Request-ID"] = str(uuid.uuid4())
-        # S7: rimosso 'unsafe-inline' da style-src
-        response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; "
-            "style-src 'self' https://fonts.googleapis.com; "
-            "font-src 'self' https://fonts.gstatic.com; "
-            "img-src 'self' data:; "
-            "media-src 'self' blob:; "
-            "connect-src 'self' ws: wss:; "
-            "worker-src 'self'; "
-            "frame-ancestors 'none'"
-        )
+        # S7: CSP – skip override for XML/txt files (sitemap, robots)
+        req_path = request.url.path
+        if req_path not in ("/sitemap.xml", "/robots.txt"):
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; "
+                "style-src 'self' https://fonts.googleapis.com; "
+                "font-src 'self' https://fonts.gstatic.com; "
+                "img-src 'self' data:; "
+                "media-src 'self' blob:; "
+                "connect-src 'self' ws: wss:; "
+                "worker-src 'self'; "
+                "frame-ancestors 'none'"
+            )
         return response
 
 
@@ -167,6 +169,12 @@ async def service_worker():
 async def robots_txt():
     robots_path = FRONTEND_DIR / "robots.txt"
     return FileResponse(path=str(robots_path), media_type="text/plain")
+
+
+@app.get("/favicon.ico")
+async def favicon():
+    favicon_path = FRONTEND_DIR / "favicon.png"
+    return FileResponse(path=str(favicon_path), media_type="image/png")
 
 
 @app.get("/sitemap.xml")
