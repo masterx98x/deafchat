@@ -178,7 +178,7 @@
         }
         if (audioChunks.length === 0) return; // cancelled
 
-        const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+        const blob = new Blob(audioChunks, { type: mimeType || 'audio/webm' });
         const duration = Math.round((Date.now() - recordingStartTime) / 1000);
 
         const reader = new FileReader();
