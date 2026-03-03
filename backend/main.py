@@ -180,11 +180,7 @@ async def favicon():
 @app.get("/sitemap.xml")
 async def sitemap_xml():
     sitemap_path = FRONTEND_DIR / "sitemap.xml"
-    return FileResponse(
-        path=str(sitemap_path),
-        media_type="application/xml",
-        headers={"Content-Security-Policy": "default-src 'self'; style-src 'self' 'unsafe-inline'"},
-    )
+    return FileResponse(path=str(sitemap_path), media_type="application/xml")
 
 
 @app.get("/", response_class=HTMLResponse)
