@@ -1,0 +1,13 @@
+[project]
+name = "deafchat"
+version = "1.0.0"
+description = "Chat temporanea, senza registrazione, effimera e orientata alla privacy. Parte del laboratorio DeafSuite."
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.scripts]
+deafchat = "backend.main:run"

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DeafChat – Chat temporanea e privata</title>
+  <meta name="description" content="Chat temporanea, senza registrazione, effimera e orientata alla privacy. Parte del laboratorio DeafSuite." />
+  <link rel="icon" href="/static/favicon.png" type="image/png" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body class="dc-body">
+  <header class="dc-header">
+    <div class="dc-container">
+      <h1 class="dc-logo">
+        <span class="dc-logo-badge" aria-hidden="true"><img src="/static/favicon.png" alt="" /></span>
+        <span class="dc-logo-text">DeafChat</span>
+      </h1>
+      <p class="dc-tagline">Chat temporanea &bull; Senza registrazione &bull; Privacy-first</p>
+    </div>
+  </header>
+
+  <main class="dc-main">
+    <div class="dc-container">
+      <!-- Hero section -->
+      <section class="dc-hero" aria-label="Crea una nuova chat">
+        <h2 class="dc-hero-title">Comunica senza lasciare tracce</h2>
+        <p class="dc-hero-desc">
+          Crea una stanza in un click, condividi il link e chatta in modo sicuro.
+          Nessun account, nessun dato salvato. Quando la stanza scade, tutto sparisce.
+        </p>
+
+        <form id="create-room-form" class="dc-create-form" aria-label="Crea stanza">
+          <div class="dc-form-row">
+            <label for="room-name" class="dc-label">Nome stanza <span class="dc-optional">(opzionale)</span></label>
+            <input
+              type="text"
+              id="room-name"
+              name="room_name"
+              class="dc-input"
+              placeholder="Es. Riunione team, Chat veloce..."
+              maxlength="60"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="dc-form-row">
+            <label for="expiry" class="dc-label">Autodistruzione</label>
+            <div class="dc-expiry-group">
+              <label class="dc-expiry-option">
+                <input type="radio" name="expiry_minutes" value="5" />
+                <span class="dc-expiry-chip">5 min</span>
+              </label>
+              <label class="dc-expiry-option">
+                <input type="radio" name="expiry_minutes" value="15" />
+                <span class="dc-expiry-chip">15 min</span>
+              </label>
+              <label class="dc-expiry-option">
+                <input type="radio" name="expiry_minutes" value="30" checked />
+                <span class="dc-expiry-chip">30 min</span>
+              </label>
+              <label class="dc-expiry-option">
+                <input type="radio" name="expiry_minutes" value="60" />
+                <span class="dc-expiry-chip">1 ora</span>
+              </label>
+              <label class="dc-expiry-option">
+                <input type="radio" name="expiry_minutes" value="120" />
+                <span class="dc-expiry-chip">2 ore</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="dc-form-row">
+            <label class="dc-label">Tipo</label>
+            <div class="dc-radio-group">
+              <label class="dc-radio-label">
+                <input type="radio" name="room_type" value="group" checked />
+                <span class="dc-radio-text">
+                  <span class="dc-radio-icon" aria-hidden="true">👥</span>
+                  Gruppo
+                </span>
+              </label>
+              <label class="dc-radio-label">
+                <input type="radio" name="room_type" value="private" />
+                <span class="dc-radio-text">
+                  <span class="dc-radio-icon" aria-hidden="true">🔒</span>
+                  Privata (1-to-1)
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="dc-btn dc-btn-primary dc-btn-lg" id="create-btn">
+            Crea stanza
+          </button>
+        </form>
+      </section>
+
+      <!-- Link result (hidden by default) -->
+      <section id="room-result" class="dc-result" hidden aria-live="polite">
+        <h3 class="dc-result-title">La tua stanza è pronta!</h3>
+        <div class="dc-link-box">
+          <input
+            type="text"
+            id="room-link"
+            class="dc-input dc-link-input"
+            readonly
+            aria-label="Link della stanza"
+          />
+          <button type="button" class="dc-btn dc-btn-secondary" id="copy-link-btn" aria-label="Copia link">
+            📋 Copia
+          </button>
+        </div>
+        <div class="dc-result-actions">
+          <a id="go-to-room" href="#" class="dc-btn dc-btn-primary">Entra nella stanza</a>
+          <button type="button" class="dc-btn dc-btn-ghost" id="new-room-btn">Crea un'altra stanza</button>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section class="dc-features" aria-label="Caratteristiche">
+        <div class="dc-feature">
+          <span class="dc-feature-icon" aria-hidden="true">⏳</span>
+          <h3>Effimera</h3>
+          <p>Scegli tu il timer: 5 min, 15 min, 30 min, 1 ora o 2 ore. Poi tutto sparisce.</p>
+        </div>
+        <div class="dc-feature">
+          <span class="dc-feature-icon" aria-hidden="true">🔐</span>
+          <h3>Senza registrazione</h3>
+          <p>Nessun account, nessuna email. Scegli un nickname e inizia a chattare.</p>
+        </div>
+        <div class="dc-feature">
+          <span class="dc-feature-icon" aria-hidden="true">🗑️</span>
+          <h3>Zero tracce</h3>
+          <p>I messaggi vivono solo in memoria. Nulla viene salvato su disco.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="dc-footer">
+    <div class="dc-container">
+      <p>
+        <strong>DeafChat</strong> &ndash; un progetto del laboratorio
+        <a href="https://www.deafsuite.it/" rel="noopener" target="_blank">DeafSuite</a>
+      </p>
+    </div>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

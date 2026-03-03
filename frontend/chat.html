@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DeafChat</title>
+  <link rel="icon" href="/static/favicon.png" type="image/png" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body class="dc-body">
+  <!-- Nickname overlay -->
+  <div id="nickname-overlay" class="dc-overlay" role="dialog" aria-modal="true" aria-label="Scegli un nickname">
+    <div class="dc-overlay-card">
+      <h2 class="dc-overlay-title">
+        <span class="dc-logo-badge" aria-hidden="true"><img src="/static/favicon.png" alt="" /></span> Entra nella chat
+      </h2>
+      <p class="dc-overlay-desc" id="overlay-room-name"></p>
+      <form id="nickname-form" class="dc-overlay-form">
+        <label for="nickname-input" class="dc-label">Il tuo nickname</label>
+        <input
+          type="text"
+          id="nickname-input"
+          class="dc-input"
+          placeholder="Es. Marco, LIS_user, ..."
+          maxlength="30"
+          required
+          autocomplete="off"
+          autofocus
+        />
+        <button type="submit" class="dc-btn dc-btn-primary dc-btn-lg">Entra</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Chat interface (hidden until joined) -->
+  <div id="chat-app" class="dc-chat-app" hidden>
+    <header class="dc-chat-header">
+      <div class="dc-chat-header-left">
+        <a href="/" class="dc-chat-back" aria-label="Torna alla home" title="Torna alla home">&larr;</a>
+        <div>
+          <h1 class="dc-chat-room-name" id="chat-room-name">Chat</h1>
+          <div class="dc-chat-meta">
+            <span class="dc-chat-members-count" id="members-count">0 partecipanti</span>
+            <span class="dc-countdown" id="countdown" title="Autodistruzione"></span>
+          </div>
+        </div>
+      </div>
+      <div class="dc-chat-header-right">
+        <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm dc-notif-btn" id="notif-toggle" aria-label="Attiva notifiche" title="Notifiche">
+          🔔<span class="dc-notif-dot"></span>
+        </button>
+        <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm" id="share-btn" aria-label="Condividi link" title="Condividi link">
+          🔗 Condividi
+        </button>
+        <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm" id="members-toggle" aria-label="Mostra partecipanti" title="Partecipanti">
+          👥
+        </button>
+      </div>
+    </header>
+
+    <!-- Members sidebar -->
+    <aside id="members-sidebar" class="dc-members-sidebar" hidden>
+      <div class="dc-members-header">
+        <h2>Partecipanti</h2>
+        <button type="button" class="dc-members-close" id="members-close" aria-label="Chiudi">&times;</button>
+      </div>
+      <ul id="members-list" class="dc-members-list"></ul>
+    </aside>
+
+    <!-- Messages area -->
+    <div id="messages" class="dc-messages" role="log" aria-live="polite" aria-label="Messaggi della chat"></div>
+
+    <!-- Recording indicator (hidden by default) -->
+    <div id="recording-bar" class="dc-recording-bar" hidden>
+      <span class="dc-rec-dot"></span>
+      <span class="dc-rec-label">Registrazione</span>
+      <span class="dc-rec-timer" id="rec-timer">0:00</span>
+      <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm" id="rec-cancel" aria-label="Annulla registrazione">✕</button>
+      <button type="button" class="dc-btn dc-btn-primary dc-btn-sm" id="rec-stop" aria-label="Invia audio">Invia 🎤</button>
+    </div>
+
+    <!-- Input bar -->
+    <form id="message-form" class="dc-message-form">
+      <label for="message-input" class="sr-only">Scrivi un messaggio</label>
+      <input
+        type="text"
+        id="message-input"
+        class="dc-input dc-message-input"
+        placeholder="Scrivi un messaggio..."
+        maxlength="2000"
+        autocomplete="off"
+        required
+      />
+      <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm dc-mic-btn" id="mic-btn" aria-label="Registra audiomessaggio" title="Audiomessaggio">
+        🎤
+      </button>
+      <button type="submit" class="dc-btn dc-btn-primary dc-send-btn" aria-label="Invia messaggio">
+        Invia
+      </button>
+    </form>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container" class="dc-toast-container" aria-live="polite"></div>
+
+  <script src="/static/js/chat.js"></script>
+</body>
+</html>
