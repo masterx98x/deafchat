@@ -64,7 +64,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "no-referrer"
-        response.headers["Permissions-Policy"] = "camera=(), microphone=(self), geolocation=()"
+        response.headers["Permissions-Policy"] = "camera=(self), microphone=(self), geolocation=()"
         # S5: HSTS – forza HTTPS
         response.headers["Strict-Transport-Security"] = (
             "max-age=63072000; includeSubDomains"
