@@ -87,10 +87,10 @@ img { max-width: 100%; height: auto; }
 }
 .dc-header-inner {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
-  gap: .4rem;
+  justify-content: space-between;
+  gap: .8rem;
 }
 .dc-logo {
   font-size: 1.5rem;
@@ -105,42 +105,40 @@ img { max-width: 100%; height: auto; }
 .dc-nav {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: .65rem;
-  flex-wrap: wrap;
-  padding: .45rem .55rem;
-  margin: .55rem auto 0;
-  width: fit-content;
-  border: 1px solid rgba(71, 85, 105, 0.65);
-  border-radius: 12px;
-  background: rgba(2, 6, 23, 0.78);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-.dc-nav-label {
-  font-size: .68rem;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--dc-text-soft);
-  opacity: .9;
-  margin-right: .2rem;
+  justify-content: flex-end;
+  gap: .55rem;
 }
 .dc-nav-btn {
-  min-width: 145px;
-  padding: .58rem 1rem;
-  font-size: .74rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 124px;
+  padding: .48rem .9rem;
+  font-family: var(--dc-font);
+  font-size: .76rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .06em;
-  border-radius: 10px;
+  letter-spacing: .045em;
+  color: #dbe5f5;
+  text-decoration: none;
+  border-radius: 9px;
   border-width: 1px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  border-color: rgba(71, 85, 105, 0.75);
+  background: rgba(15, 23, 42, 0.92);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  transition: transform .18s ease, border-color .2s ease, background .2s ease, color .2s ease, box-shadow .2s ease;
 }
-.dc-nav .dc-nav-btn:hover {
-  transform: translateY(-2px) scale(1.01);
+.dc-nav-btn:hover {
+  color: #ffffff;
+  text-decoration: none;
+  border-color: rgba(148, 163, 184, 0.95);
+  background: rgba(30, 41, 59, 0.98);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+  transform: translateY(-1px);
 }
-.dc-nav .dc-nav-btn:active {
-  transform: translateY(0) scale(.99);
+.dc-nav-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.28);
 }
 .dc-logo-badge {
   display: inline-flex;
@@ -1027,9 +1025,8 @@ img { max-width: 100%; height: auto; }
   .dc-logo-badge { width: 30px; height: 30px; border-radius: 10px; }
   .dc-logo-badge img { border-radius: 10px; }
   .dc-tagline { font-size: .75rem; }
-  .dc-nav { gap: .4rem; width: 100%; max-width: 360px; }
-  .dc-nav-label { width: 100%; margin-right: 0; margin-bottom: .1rem; }
-  .dc-nav-btn { min-width: 0; flex: 1; padding: .5rem .55rem; font-size: .66rem; }
+  .dc-nav { gap: .35rem; width: 100%; justify-content: center; }
+  .dc-nav-btn { min-width: 0; flex: 1; max-width: 150px; padding: .45rem .5rem; font-size: .65rem; }
   .dc-main { padding: 1rem 0; }
   .dc-hero { margin-bottom: 1.5rem; }
   .dc-hero-title { font-size: 1.2rem; }
