@@ -78,12 +78,17 @@ img { max-width: 100%; height: auto; }
   position: sticky;
   top: 0;
   z-index: 100;
-  padding: 1rem 0;
+  padding: .75rem 0 .5rem;
   text-align: center;
   background: rgba(15, 23, 42, 0.92);
   border-bottom: 1px solid var(--dc-border);
   backdrop-filter: var(--dc-blur);
   -webkit-backdrop-filter: var(--dc-blur);
+}
+.dc-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 .dc-logo {
   font-size: 1.5rem;
@@ -91,8 +96,41 @@ img { max-width: 100%; height: auto; }
   letter-spacing: -.02em;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: .65rem;
+}
+
+/* ---------- Nav menu ---------- */
+.dc-nav {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.dc-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .4rem .9rem;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--dc-text-soft);
+  border: 1px solid var(--dc-border);
+  border-radius: var(--dc-radius-pill);
+  background: rgba(15, 23, 42, 0.5);
+  text-decoration: none;
+  transition: all var(--dc-transition);
+  white-space: nowrap;
+}
+.dc-nav-link:hover {
+  color: #fff;
+  border-color: rgba(56, 189, 248, 0.5);
+  background: rgba(56, 189, 248, 0.1);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.15);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+.dc-nav-icon {
+  font-size: .9rem;
+  line-height: 1;
 }
 .dc-logo-badge {
   display: inline-flex;
@@ -121,7 +159,7 @@ img { max-width: 100%; height: auto; }
 .dc-tagline {
   color: #94a3b8;
   font-size: .88rem;
-  margin-top: .25rem;
+  margin-top: .3rem;
   letter-spacing: .01em;
 }
 
@@ -973,11 +1011,15 @@ img { max-width: 100%; height: auto; }
 /* ---------- Responsive: mobile (≤480px) ---------- */
 @media (max-width: 480px) {
   /* ---- Landing page ---- */
-  .dc-header { padding: .6rem 0; }
+  .dc-header { padding: .5rem 0 .35rem; }
+  .dc-header-inner { flex-wrap: wrap; justify-content: center; gap: .4rem; }
   .dc-logo { font-size: 1.15rem; gap: .5rem; }
   .dc-logo-badge { width: 30px; height: 30px; border-radius: 10px; }
   .dc-logo-badge img { border-radius: 10px; }
   .dc-tagline { font-size: .75rem; }
+  .dc-nav { gap: .35rem; }
+  .dc-nav-link { padding: .3rem .65rem; font-size: .75rem; }
+  .dc-nav-icon { font-size: .8rem; }
   .dc-main { padding: 1rem 0; }
   .dc-hero { margin-bottom: 1.5rem; }
   .dc-hero-title { font-size: 1.2rem; }
