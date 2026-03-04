@@ -655,17 +655,41 @@
 
   async function getLocalStream() {
     if (localStream) return localStream;
-    try {
-      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      localVideo.srcObject = localStream;
-      audioEnabled = true;
-      videoEnabled = true;
-      updateVcallControls();
-      return localStream;
-    } catch (err) {
-      showToast('Impossibile accedere a camera/microfono.', 'error');
+
+    // getUserMedia requires HTTPS or localhost
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showToast('Il browser non supporta la videocamera. Usa HTTPS o localhost.', 'error');
       return null;
     }
+
+    // Try video + audio first
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    } catch (videoErr) {
+      console.warn('Video+audio failed, trying audio only:', videoErr.name, videoErr.message);
+      // Fallback: audio only
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+        videoEnabled = false;
+        showToast('Camera non disponibile: solo audio.', 'warning');
+      } catch (audioErr) {
+        console.error('Audio-only also failed:', audioErr.name, audioErr.message);
+        if (audioErr.name === 'NotAllowedError') {
+          showToast('Permesso camera/microfono negato. Clicca l\'icona 🔒 nella barra del browser per abilitarli.', 'error');
+        } else if (audioErr.name === 'NotFoundError') {
+          showToast('Nessuna camera o microfono trovato sul dispositivo.', 'error');
+        } else {
+          showToast('Impossibile accedere a camera/microfono: ' + audioErr.message, 'error');
+        }
+        return null;
+      }
+    }
+
+    localVideo.srcObject = localStream;
+    audioEnabled = localStream.getAudioTracks().length > 0;
+    videoEnabled = localStream.getVideoTracks().length > 0;
+    updateVcallControls();
+    return localStream;
   }
 
   function createPeerConnection() {
