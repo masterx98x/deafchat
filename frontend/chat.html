@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DeafChat</title>
   <link rel="icon" href="/static/favicon.png" type="image/png" />
-  <link rel="stylesheet" href="/static/css/style.css?v=3" />
+  <link rel="stylesheet" href="/static/css/style.css?v=5" />
 </head>
 <body class="dc-body">
   <!-- Nickname overlay -->
@@ -46,6 +46,9 @@
         </div>
       </div>
       <div class="dc-chat-header-right">
+        <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm" id="videocall-btn" aria-label="Avvia videochiamata" title="Videochiamata" hidden>
+          📹 <span class="dc-btn-label">Chiama</span>
+        </button>
         <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm dc-notif-btn" id="notif-toggle" aria-label="Attiva notifiche" title="Notifiche">
           🔔<span class="dc-notif-dot"></span>
         </button>
@@ -100,9 +103,39 @@
     </form>
   </div>
 
+  <!-- Video call: incoming call modal -->
+  <div id="call-incoming" class="dc-call-incoming" hidden>
+    <div class="dc-call-incoming-card">
+      <div class="dc-call-incoming-pulse"></div>
+      <span class="dc-call-incoming-icon">📹</span>
+      <h3 class="dc-call-incoming-title">Videochiamata in arrivo</h3>
+      <p class="dc-call-incoming-from" id="call-from-nick"></p>
+      <div class="dc-call-incoming-actions">
+        <button type="button" class="dc-btn dc-call-btn-accept" id="call-accept-btn">✓ Accetta</button>
+        <button type="button" class="dc-btn dc-call-btn-reject" id="call-reject-btn">✕ Rifiuta</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Video call: full-screen overlay -->
+  <div id="videocall-overlay" class="dc-videocall-overlay" hidden>
+    <div class="dc-videocall-container">
+      <video id="remote-video" class="dc-video-remote" autoplay playsinline></video>
+      <video id="local-video" class="dc-video-local" autoplay playsinline muted></video>
+      <div class="dc-videocall-bar">
+        <span class="dc-videocall-status" id="videocall-status">Connessione...</span>
+        <div class="dc-videocall-controls">
+          <button type="button" class="dc-btn dc-vcall-ctrl" id="vcall-toggle-audio" title="Microfono" aria-label="Mute/Unmute">🎤</button>
+          <button type="button" class="dc-btn dc-vcall-ctrl" id="vcall-toggle-video" title="Videocamera" aria-label="Attiva/Disattiva video">📹</button>
+          <button type="button" class="dc-btn dc-vcall-hangup" id="vcall-hangup" title="Chiudi chiamata" aria-label="Chiudi chiamata">📞</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast container -->
   <div id="toast-container" class="dc-toast-container" aria-live="polite"></div>
 
-  <script src="/static/js/chat.js?v=5"></script>
+  <script src="/static/js/chat.js?v=6"></script>
 </body>
 </html>

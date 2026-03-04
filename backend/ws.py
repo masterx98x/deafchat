@@ -12,6 +12,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from .config import settings
 from .models import WSIncoming, WSMessageType, WSOutgoing
 from .rooms import room_manager
+from .models import RoomType
 
 # --- S6: per-IP connection tracking ---
 _ip_connections: dict[str, int] = defaultdict(int)
@@ -226,6 +227,35 @@ async def handle_websocket(ws: WebSocket, room_id: str) -> None:
                         timestamp=_now_iso(),
                     ),
                 )
+
+            # --- WebRTC video-call signaling (1-to-1 private rooms) ---
+            elif incoming.type in (
+                WSMessageType.call_request,
+                WSMessageType.call_accept,
+                WSMessageType.call_reject,
+                WSMessageType.call_offer,
+                WSMessageType.call_answer,
+                WSMessageType.call_ice,
+                WSMessageType.call_end,
+            ):
+                room = room_manager.get_room(room_id)
+                if not room or room.room_type != RoomType.private:
+                    await _send(ws, WSOutgoing(
+                        type=WSMessageType.error,
+                        content="Le videochiamate sono disponibili solo nelle chat private 1-to-1.",
+                        timestamp=_now_iso(),
+                    ))
+                    continue
+
+                # Forward the signaling message to the other peer
+                out = WSOutgoing(
+                    type=incoming.type,
+                    nickname=nickname,
+                    sdp=incoming.sdp,
+                    ice=incoming.ice,
+                    timestamp=_now_iso(),
+                )
+                await _broadcast(room_id, out, exclude_ws=ws)
 
     except WebSocketDisconnect:
         pass

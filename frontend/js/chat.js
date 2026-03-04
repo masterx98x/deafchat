@@ -52,6 +52,34 @@
   let _swRegistration = null;
   let _wakeLockRef = null;
 
+  // --- Video call state ---
+  const videocallBtn = document.getElementById('videocall-btn');
+  const callIncoming = document.getElementById('call-incoming');
+  const callFromNick = document.getElementById('call-from-nick');
+  const callAcceptBtn = document.getElementById('call-accept-btn');
+  const callRejectBtn = document.getElementById('call-reject-btn');
+  const videocallOverlay = document.getElementById('videocall-overlay');
+  const remoteVideo = document.getElementById('remote-video');
+  const localVideo = document.getElementById('local-video');
+  const videocallStatus = document.getElementById('videocall-status');
+  const vcallToggleAudio = document.getElementById('vcall-toggle-audio');
+  const vcallToggleVideo = document.getElementById('vcall-toggle-video');
+  const vcallHangup = document.getElementById('vcall-hangup');
+
+  let peerConnection = null;
+  let localStream = null;
+  let isInCall = false;
+  let isCaller = false;
+  let roomIsPrivate = false;
+  let audioEnabled = true;
+  let videoEnabled = true;
+
+  const ICE_SERVERS = [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun.cloudflare.com:3478' },
+  ];
+
   // --- Service Worker registration ---
   async function registerSW() {
     if ('serviceWorker' in navigator) {
@@ -291,6 +319,12 @@
       overlayRoomName.textContent = data.room_name || 'Chat';
       document.title = `${data.room_name || 'Chat'} – DeafChat`;
 
+      // Enable video call button for private rooms
+      if (data.room_type === 'private') {
+        roomIsPrivate = true;
+        if (videocallBtn) videocallBtn.hidden = false;
+      }
+
       // Start countdown timer
       if (data.expires_at) {
         expiresAt = new Date(data.expires_at);
@@ -417,6 +451,28 @@
         break;
       case 'error':
         showToast(msg.content, 'error');
+        break;
+      // --- WebRTC video call signaling ---
+      case 'call_request':
+        handleCallRequest(msg);
+        break;
+      case 'call_accept':
+        handleCallAccept(msg);
+        break;
+      case 'call_reject':
+        handleCallReject(msg);
+        break;
+      case 'call_offer':
+        handleCallOffer(msg);
+        break;
+      case 'call_answer':
+        handleCallAnswer(msg);
+        break;
+      case 'call_ice':
+        handleCallIce(msg);
+        break;
+      case 'call_end':
+        handleCallEnd(msg);
         break;
     }
   }
@@ -595,6 +651,264 @@
   }
 
   // --- Event listeners ---
+  // --- WebRTC Video Call ---
+
+  async function getLocalStream() {
+    if (localStream) return localStream;
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      localVideo.srcObject = localStream;
+      audioEnabled = true;
+      videoEnabled = true;
+      updateVcallControls();
+      return localStream;
+    } catch (err) {
+      showToast('Impossibile accedere a camera/microfono.', 'error');
+      return null;
+    }
+  }
+
+  function createPeerConnection() {
+    peerConnection = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+
+    peerConnection.onicecandidate = (event) => {
+      if (event.candidate && ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          type: 'call_ice',
+          ice: JSON.stringify(event.candidate),
+        }));
+      }
+    };
+
+    peerConnection.ontrack = (event) => {
+      remoteVideo.srcObject = event.streams[0];
+      videocallStatus.textContent = 'In chiamata';
+    };
+
+    peerConnection.oniceconnectionstatechange = () => {
+      const state = peerConnection.iceConnectionState;
+      if (state === 'connected' || state === 'completed') {
+        videocallStatus.textContent = 'In chiamata';
+      } else if (state === 'disconnected' || state === 'failed' || state === 'closed') {
+        endCall(false);
+      }
+    };
+
+    // Add local tracks
+    if (localStream) {
+      localStream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, localStream);
+      });
+    }
+
+    return peerConnection;
+  }
+
+  function showCallUI() {
+    isInCall = true;
+    videocallOverlay.hidden = false;
+    videocallStatus.textContent = 'Connessione...';
+  }
+
+  function hideCallUI() {
+    isInCall = false;
+    videocallOverlay.hidden = true;
+    callIncoming.hidden = true;
+  }
+
+  function cleanupCall() {
+    if (peerConnection) {
+      peerConnection.close();
+      peerConnection = null;
+    }
+    if (localStream) {
+      localStream.getTracks().forEach(t => t.stop());
+      localStream = null;
+    }
+    localVideo.srcObject = null;
+    remoteVideo.srcObject = null;
+    hideCallUI();
+    isCaller = false;
+    audioEnabled = true;
+    videoEnabled = true;
+  }
+
+  function endCall(notify = true) {
+    if (notify && ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'call_end' }));
+    }
+    cleanupCall();
+  }
+
+  // Caller: initiate call request
+  async function initiateCall() {
+    if (isInCall) return;
+    const stream = await getLocalStream();
+    if (!stream) return;
+
+    isCaller = true;
+    showCallUI();
+    videocallStatus.textContent = 'In attesa di risposta...';
+
+    // Send call request to the other user
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'call_request' }));
+    }
+  }
+
+  // Callee: received a call request
+  function handleCallRequest(msg) {
+    if (isInCall) return; // busy
+    callFromNick.textContent = msg.nickname + ' ti sta chiamando...';
+    callIncoming.hidden = false;
+    sendBrowserNotification(msg.nickname, '📹 Videochiamata in arrivo');
+  }
+
+  // Callee: accept the call
+  async function acceptCall() {
+    callIncoming.hidden = true;
+    const stream = await getLocalStream();
+    if (!stream) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'call_reject' }));
+      }
+      return;
+    }
+    isCaller = false;
+    showCallUI();
+
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'call_accept' }));
+    }
+    // Wait for caller to send offer
+  }
+
+  // Callee: reject the call
+  function rejectCall() {
+    callIncoming.hidden = true;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'call_reject' }));
+    }
+  }
+
+  // Caller: other user accepted → create offer
+  async function handleCallAccept(msg) {
+    if (!isCaller) return;
+    videocallStatus.textContent = 'Connessione in corso...';
+
+    createPeerConnection();
+
+    try {
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          type: 'call_offer',
+          sdp: JSON.stringify(offer),
+        }));
+      }
+    } catch (err) {
+      showToast('Errore nella creazione della chiamata.', 'error');
+      endCall();
+    }
+  }
+
+  // Caller: other user rejected
+  function handleCallReject(msg) {
+    showToast(msg.nickname + ' ha rifiutato la chiamata.', 'warning');
+    cleanupCall();
+  }
+
+  // Callee: received SDP offer → create answer
+  async function handleCallOffer(msg) {
+    if (isCaller) return;
+
+    createPeerConnection();
+
+    try {
+      const offer = JSON.parse(msg.sdp);
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          type: 'call_answer',
+          sdp: JSON.stringify(answer),
+        }));
+      }
+    } catch (err) {
+      showToast('Errore nella risposta alla chiamata.', 'error');
+      endCall();
+    }
+  }
+
+  // Caller: received SDP answer
+  async function handleCallAnswer(msg) {
+    if (!peerConnection) return;
+    try {
+      const answer = JSON.parse(msg.sdp);
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+    } catch (err) {
+      showToast('Errore nella connessione.', 'error');
+      endCall();
+    }
+  }
+
+  // Both: received ICE candidate
+  async function handleCallIce(msg) {
+    if (!peerConnection) return;
+    try {
+      const candidate = JSON.parse(msg.ice);
+      await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+    } catch {
+      // Ignore ICE errors (non-critical)
+    }
+  }
+
+  // Other user ended the call
+  function handleCallEnd(msg) {
+    showToast(msg.nickname + ' ha terminato la chiamata.', 'info');
+    cleanupCall();
+  }
+
+  // Toggle audio/video
+  function updateVcallControls() {
+    if (vcallToggleAudio) vcallToggleAudio.textContent = audioEnabled ? '🎤' : '🔇';
+    if (vcallToggleVideo) vcallToggleVideo.textContent = videoEnabled ? '📹' : '📷';
+  }
+
+  // Video call button event listeners
+  if (videocallBtn) {
+    videocallBtn.addEventListener('click', initiateCall);
+  }
+  if (callAcceptBtn) {
+    callAcceptBtn.addEventListener('click', acceptCall);
+  }
+  if (callRejectBtn) {
+    callRejectBtn.addEventListener('click', rejectCall);
+  }
+  if (vcallHangup) {
+    vcallHangup.addEventListener('click', () => endCall(true));
+  }
+  if (vcallToggleAudio) {
+    vcallToggleAudio.addEventListener('click', () => {
+      if (!localStream) return;
+      audioEnabled = !audioEnabled;
+      localStream.getAudioTracks().forEach(t => { t.enabled = audioEnabled; });
+      updateVcallControls();
+    });
+  }
+  if (vcallToggleVideo) {
+    vcallToggleVideo.addEventListener('click', () => {
+      if (!localStream) return;
+      videoEnabled = !videoEnabled;
+      localStream.getVideoTracks().forEach(t => { t.enabled = videoEnabled; });
+      updateVcallControls();
+    });
+  }
+
+  // --- Original Event listeners ---
   nicknameForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const val = nicknameInput.value.trim();

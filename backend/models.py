@@ -50,6 +50,14 @@ class WSMessageType(str, Enum):
     system = "system"
     error = "error"
     members = "members"
+    # WebRTC video-call signaling (1-to-1 only)
+    call_request = "call_request"
+    call_accept = "call_accept"
+    call_reject = "call_reject"
+    call_offer = "call_offer"
+    call_answer = "call_answer"
+    call_ice = "call_ice"
+    call_end = "call_end"
 
 
 class WSIncoming(BaseModel):
@@ -60,6 +68,9 @@ class WSIncoming(BaseModel):
     audio_data: str = ""
     audio_duration: float = 0
     audio_mime: str = ""
+    # WebRTC signaling fields
+    sdp: str = ""
+    ice: str = ""  # JSON-encoded ICE candidate
 
 
 class WSOutgoing(BaseModel):
@@ -72,3 +83,6 @@ class WSOutgoing(BaseModel):
     audio_mime: str = ""
     timestamp: str = ""
     members: list[str] = Field(default_factory=list)
+    # WebRTC signaling fields
+    sdp: str = ""
+    ice: str = ""
