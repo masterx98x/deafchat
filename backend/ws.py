@@ -228,6 +228,52 @@ async def handle_websocket(ws: WebSocket, room_id: str) -> None:
                     ),
                 )
 
+            elif incoming.type == WSMessageType.image:
+                # Image rate-limit (use audio bucket – stricter)
+                if not audio_bucket.consume():
+                    await _send(ws, WSOutgoing(
+                        type=WSMessageType.error,
+                        content="Troppi invii. Aspetta un momento.",
+                        timestamp=_now_iso(),
+                    ))
+                    continue
+
+                image_data = incoming.image_data
+                if not image_data:
+                    continue
+                # Validate size
+                if len(image_data) > settings.max_image_size:
+                    await _send(ws, WSOutgoing(
+                        type=WSMessageType.error,
+                        content="Immagine troppo grande (max 1.5 MB).",
+                        timestamp=_now_iso(),
+                    ))
+                    continue
+                # Validate mime
+                allowed_mimes = ("image/jpeg", "image/png", "image/gif", "image/webp")
+                if incoming.image_mime not in allowed_mimes:
+                    await _send(ws, WSOutgoing(
+                        type=WSMessageType.error,
+                        content="Formato immagine non supportato.",
+                        timestamp=_now_iso(),
+                    ))
+                    continue
+
+                room = room_manager.get_room(room_id)
+                if room:
+                    room.touch()
+
+                await _broadcast(
+                    room_id,
+                    WSOutgoing(
+                        type=WSMessageType.image,
+                        nickname=nickname,
+                        image_data=image_data,
+                        image_mime=incoming.image_mime,
+                        timestamp=_now_iso(),
+                    ),
+                )
+
             # --- WebRTC video-call signaling (1-to-1 private rooms) ---
             elif incoming.type in (
                 WSMessageType.call_request,
@@ -253,6 +299,7 @@ async def handle_websocket(ws: WebSocket, room_id: str) -> None:
                     nickname=nickname,
                     sdp=incoming.sdp,
                     ice=incoming.ice,
+                    call_mode=incoming.call_mode,
                     timestamp=_now_iso(),
                 )
                 await _broadcast(room_id, out, exclude_ws=ws)

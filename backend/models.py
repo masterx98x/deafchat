@@ -47,6 +47,7 @@ class WSMessageType(str, Enum):
     leave = "leave"
     message = "message"
     audio = "audio"
+    image = "image"
     system = "system"
     error = "error"
     members = "members"
@@ -71,6 +72,10 @@ class WSIncoming(BaseModel):
     # WebRTC signaling fields
     sdp: str = ""
     ice: str = ""  # JSON-encoded ICE candidate
+    call_mode: str = "video"  # "video" or "voice"
+    # Image fields
+    image_data: str = ""  # base64-encoded image
+    image_mime: str = ""  # e.g. image/jpeg
 
 
 class WSOutgoing(BaseModel):
@@ -86,3 +91,7 @@ class WSOutgoing(BaseModel):
     # WebRTC signaling fields
     sdp: str = ""
     ice: str = ""
+    call_mode: str = "video"  # "video" or "voice"
+    # Image fields
+    image_data: str = ""
+    image_mime: str = ""

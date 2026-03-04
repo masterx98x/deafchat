@@ -37,6 +37,11 @@ class Settings:
         default_factory=lambda: int(os.getenv("MAX_AUDIO_SIZE", "1500000"))
     )
 
+    # Images
+    max_image_size: int = field(
+        default_factory=lambda: int(os.getenv("MAX_IMAGE_SIZE", "2000000"))  # ~2 MB base64
+    )
+
     # Security
     cors_origins: str = field(
         default_factory=lambda: os.getenv("CORS_ORIGINS", "*")

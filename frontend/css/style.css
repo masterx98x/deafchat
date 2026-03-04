@@ -827,6 +827,51 @@ img { max-width: 100%; height: auto; }
   color: var(--dc-text);
 }
 
+/* ---------- Image Messages ---------- */
+.dc-msg-image-bubble {
+  padding: .4rem;
+  max-width: 320px;
+}
+.dc-msg-image {
+  display: block;
+  width: 100%;
+  max-height: 400px;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: opacity .2s ease;
+}
+.dc-msg-image:hover {
+  opacity: .85;
+}
+.dc-msg-image-bubble .dc-msg-time {
+  display: block;
+  text-align: right;
+  margin-top: .25rem;
+}
+/* Fullscreen image overlay */
+.dc-img-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+  animation: dc-fade-in .2s ease;
+}
+.dc-img-fullscreen img {
+  max-width: 95vw;
+  max-height: 95vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+/* Photo button styling */
+.dc-photo-btn {
+  font-size: 1.2rem;
+}
+
 /* ---------- Custom Audio Player in chat bubbles ---------- */
 .dc-msg-audio-bubble {
   padding: .6rem .85rem;
@@ -1199,6 +1244,27 @@ img { max-width: 100%; height: auto; }
   background: #ef4444;
   transform: rotate(135deg) scale(1.08);
   box-shadow: 0 6px 20px rgba(248, 113, 113, 0.5);
+}
+
+/* Voice-only call mode */
+.dc-voice-mode {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+.dc-voice-mode .dc-videocall-container {
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.dc-voice-mode .dc-videocall-container::before {
+  content: '📞';
+  font-size: 4rem;
+  animation: dc-voice-pulse 2s ease-in-out infinite;
+}
+.dc-voice-mode .dc-videocall-bar {
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+}
+@keyframes dc-voice-pulse {
+  0%, 100% { transform: scale(1); opacity: .7; }
+  50% { transform: scale(1.15); opacity: 1; }
 }
 
 /* Responsive: mobile video call */

@@ -28,6 +28,8 @@
   const notifToggle = document.getElementById('notif-toggle');
   const countdownEl = document.getElementById('countdown');
   const micBtn = document.getElementById('mic-btn');
+  const photoBtn = document.getElementById('photo-btn');
+  const photoInput = document.getElementById('photo-input');
   const recordingBar = document.getElementById('recording-bar');
   const recTimerEl = document.getElementById('rec-timer');
   const recCancel = document.getElementById('rec-cancel');
@@ -54,7 +56,10 @@
 
   // --- Video call state ---
   const videocallBtn = document.getElementById('videocall-btn');
+  const voicecallBtn = document.getElementById('voicecall-btn');
   const callIncoming = document.getElementById('call-incoming');
+  const callIncomingIcon = document.getElementById('call-incoming-icon');
+  const callIncomingTitle = document.getElementById('call-incoming-title');
   const callFromNick = document.getElementById('call-from-nick');
   const callAcceptBtn = document.getElementById('call-accept-btn');
   const callRejectBtn = document.getElementById('call-reject-btn');
@@ -73,6 +78,7 @@
   let roomIsPrivate = false;
   let audioEnabled = true;
   let videoEnabled = true;
+  let currentCallMode = 'video'; // 'video' or 'voice'
 
   const ICE_SERVERS = [
     { urls: 'stun:stun.l.google.com:19302' },
@@ -319,10 +325,11 @@
       overlayRoomName.textContent = data.room_name || 'Chat';
       document.title = `${data.room_name || 'Chat'} – DeafChat`;
 
-      // Enable video call button for private rooms
+      // Enable call buttons for private rooms
       if (data.room_type === 'private') {
         roomIsPrivate = true;
         if (videocallBtn) videocallBtn.hidden = false;
+        if (voicecallBtn) voicecallBtn.hidden = false;
       }
 
       // Start countdown timer
@@ -443,6 +450,9 @@
       case 'audio':
         appendAudioMessage(msg);
         break;
+      case 'image':
+        appendImageMessage(msg);
+        break;
       case 'system':
         appendSystemMessage(msg.content, msg.timestamp);
         break;
@@ -496,6 +506,51 @@
     // Browser notification for messages from others
     if (!isMe) {
       sendBrowserNotification(msg.nickname, msg.content);
+    }
+  }
+
+  function appendImageMessage(msg) {
+    const isMe = msg.nickname === nickname;
+    const wrapper = document.createElement('div');
+    wrapper.className = `dc-msg ${isMe ? 'dc-msg-mine' : 'dc-msg-other'}`;
+
+    const bubble = document.createElement('div');
+    bubble.className = 'dc-msg-bubble dc-msg-image-bubble';
+
+    if (!isMe) {
+      const nickEl = document.createElement('span');
+      nickEl.className = 'dc-msg-nick';
+      nickEl.textContent = msg.nickname;
+      bubble.appendChild(nickEl);
+    }
+
+    const img = document.createElement('img');
+    img.className = 'dc-msg-image';
+    img.alt = 'Foto';
+    const mime = msg.image_mime || 'image/jpeg';
+    img.src = `data:${mime};base64,${msg.image_data}`;
+    img.loading = 'lazy';
+    // Click to open fullscreen
+    img.addEventListener('click', () => {
+      const overlay = document.createElement('div');
+      overlay.className = 'dc-img-fullscreen';
+      overlay.innerHTML = `<img src="${img.src}" alt="Foto" />`;
+      overlay.addEventListener('click', () => overlay.remove());
+      document.body.appendChild(overlay);
+    });
+    bubble.appendChild(img);
+
+    const timeEl = document.createElement('span');
+    timeEl.className = 'dc-msg-time';
+    timeEl.textContent = formatTime(msg.timestamp);
+    bubble.appendChild(timeEl);
+
+    wrapper.appendChild(bubble);
+    messagesDiv.appendChild(wrapper);
+    scrollToBottom();
+
+    if (!isMe) {
+      sendBrowserNotification(msg.nickname, '📷 Ha inviato una foto');
     }
   }
 
@@ -653,7 +708,7 @@
   // --- Event listeners ---
   // --- WebRTC Video Call ---
 
-  async function getLocalStream() {
+  async function getLocalStream(mode) {
     if (localStream) return localStream;
 
     // getUserMedia requires HTTPS or localhost
@@ -662,24 +717,44 @@
       return null;
     }
 
-    // Try video + audio first
-    try {
-      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    } catch (videoErr) {
-      console.warn('Video+audio failed, trying audio only:', videoErr.name, videoErr.message);
-      // Fallback: audio only
+    const wantVideo = mode === 'video';
+
+    if (wantVideo) {
+      // Try video + audio first
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      } catch (videoErr) {
+        console.warn('Video+audio failed, trying audio only:', videoErr.name, videoErr.message);
+        // Fallback: audio only
+        try {
+          localStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+          videoEnabled = false;
+          showToast('Camera non disponibile: solo audio.', 'warning');
+        } catch (audioErr) {
+          console.error('Audio-only also failed:', audioErr.name, audioErr.message);
+          if (audioErr.name === 'NotAllowedError') {
+            showToast('Permesso camera/microfono negato. Clicca l\'icona 🔒 nella barra del browser per abilitarli.', 'error');
+          } else if (audioErr.name === 'NotFoundError') {
+            showToast('Nessuna camera o microfono trovato sul dispositivo.', 'error');
+          } else {
+            showToast('Impossibile accedere a camera/microfono: ' + audioErr.message, 'error');
+          }
+          return null;
+        }
+      }
+    } else {
+      // Voice-only: request audio only
       try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
         videoEnabled = false;
-        showToast('Camera non disponibile: solo audio.', 'warning');
       } catch (audioErr) {
-        console.error('Audio-only also failed:', audioErr.name, audioErr.message);
+        console.error('Audio failed:', audioErr.name, audioErr.message);
         if (audioErr.name === 'NotAllowedError') {
-          showToast('Permesso camera/microfono negato. Clicca l\'icona 🔒 nella barra del browser per abilitarli.', 'error');
+          showToast('Permesso microfono negato. Clicca l\'icona 🔒 nella barra del browser per abilitarli.', 'error');
         } else if (audioErr.name === 'NotFoundError') {
-          showToast('Nessuna camera o microfono trovato sul dispositivo.', 'error');
+          showToast('Nessun microfono trovato sul dispositivo.', 'error');
         } else {
-          showToast('Impossibile accedere a camera/microfono: ' + audioErr.message, 'error');
+          showToast('Impossibile accedere al microfono: ' + audioErr.message, 'error');
         }
         return null;
       }
@@ -732,6 +807,18 @@
     isInCall = true;
     videocallOverlay.hidden = false;
     videocallStatus.textContent = 'Connessione...';
+    // In voice-only mode, hide local video and show voice indicator
+    if (currentCallMode === 'voice') {
+      localVideo.style.display = 'none';
+      remoteVideo.style.display = 'none';
+      videocallOverlay.classList.add('dc-voice-mode');
+      if (vcallToggleVideo) vcallToggleVideo.style.display = 'none';
+    } else {
+      localVideo.style.display = '';
+      remoteVideo.style.display = '';
+      videocallOverlay.classList.remove('dc-voice-mode');
+      if (vcallToggleVideo) vcallToggleVideo.style.display = '';
+    }
   }
 
   function hideCallUI() {
@@ -755,6 +842,7 @@
     isCaller = false;
     audioEnabled = true;
     videoEnabled = true;
+    currentCallMode = 'video';
   }
 
   function endCall(notify = true) {
@@ -765,9 +853,10 @@
   }
 
   // Caller: initiate call request
-  async function initiateCall() {
+  async function initiateCall(mode) {
     if (isInCall) return;
-    const stream = await getLocalStream();
+    currentCallMode = mode || 'video';
+    const stream = await getLocalStream(currentCallMode);
     if (!stream) return;
 
     isCaller = true;
@@ -776,22 +865,26 @@
 
     // Send call request to the other user
     if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ type: 'call_request' }));
+      ws.send(JSON.stringify({ type: 'call_request', call_mode: currentCallMode }));
     }
   }
 
   // Callee: received a call request
   function handleCallRequest(msg) {
     if (isInCall) return; // busy
+    currentCallMode = msg.call_mode || 'video';
+    const isVideo = currentCallMode === 'video';
     callFromNick.textContent = msg.nickname + ' ti sta chiamando...';
+    if (callIncomingIcon) callIncomingIcon.textContent = isVideo ? '📹' : '📞';
+    if (callIncomingTitle) callIncomingTitle.textContent = isVideo ? 'Videochiamata in arrivo' : 'Chiamata vocale in arrivo';
     callIncoming.hidden = false;
-    sendBrowserNotification(msg.nickname, '📹 Videochiamata in arrivo');
+    sendBrowserNotification(msg.nickname, isVideo ? '📹 Videochiamata in arrivo' : '📞 Chiamata vocale in arrivo');
   }
 
   // Callee: accept the call
   async function acceptCall() {
     callIncoming.hidden = true;
-    const stream = await getLocalStream();
+    const stream = await getLocalStream(currentCallMode);
     if (!stream) {
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type: 'call_reject' }));
@@ -904,7 +997,10 @@
 
   // Video call button event listeners
   if (videocallBtn) {
-    videocallBtn.addEventListener('click', initiateCall);
+    videocallBtn.addEventListener('click', () => initiateCall('video'));
+  }
+  if (voicecallBtn) {
+    voicecallBtn.addEventListener('click', () => initiateCall('voice'));
   }
   if (callAcceptBtn) {
     callAcceptBtn.addEventListener('click', acceptCall);
@@ -987,6 +1083,40 @@
   }
   if (recStop) {
     recStop.addEventListener('click', () => stopRecording(true));
+  }
+
+  // Photo send
+  const MAX_IMAGE_SIZE = 1.5 * 1024 * 1024; // 1.5 MB raw file
+  if (photoBtn && photoInput) {
+    photoBtn.addEventListener('click', () => photoInput.click());
+    photoInput.addEventListener('change', async () => {
+      const file = photoInput.files[0];
+      photoInput.value = '';
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        showToast('Seleziona un file immagine.', 'warning');
+        return;
+      }
+      if (file.size > MAX_IMAGE_SIZE) {
+        showToast('Immagine troppo grande (max 1.5 MB).', 'warning');
+        return;
+      }
+      // Read as base64
+      const reader = new FileReader();
+      reader.onload = () => {
+        // result is "data:image/jpeg;base64,AAAA..."
+        const base64 = reader.result.split(',')[1];
+        if (!base64) return;
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({
+            type: 'image',
+            image_data: base64,
+            image_mime: file.type,
+          }));
+        }
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   // Notification toggle

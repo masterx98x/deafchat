@@ -47,7 +47,10 @@
       </div>
       <div class="dc-chat-header-right">
         <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm" id="videocall-btn" aria-label="Avvia videochiamata" title="Videochiamata" hidden>
-          📹 <span class="dc-btn-label">Chiama</span>
+          📹
+        </button>
+        <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm" id="voicecall-btn" aria-label="Avvia chiamata vocale" title="Chiamata vocale" hidden>
+          📞
         </button>
         <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm dc-notif-btn" id="notif-toggle" aria-label="Attiva notifiche" title="Notifiche">
           🔔<span class="dc-notif-dot"></span>
@@ -94,6 +97,10 @@
         autocomplete="off"
         required
       />
+      <input type="file" id="photo-input" accept="image/*" hidden />
+      <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm dc-photo-btn" id="photo-btn" aria-label="Invia foto" title="Invia foto">
+        📷
+      </button>
       <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm dc-mic-btn" id="mic-btn" aria-label="Registra audiomessaggio" title="Audiomessaggio">
         🎤
       </button>
@@ -107,8 +114,8 @@
   <div id="call-incoming" class="dc-call-incoming" hidden>
     <div class="dc-call-incoming-card">
       <div class="dc-call-incoming-pulse"></div>
-      <span class="dc-call-incoming-icon">📹</span>
-      <h3 class="dc-call-incoming-title">Videochiamata in arrivo</h3>
+      <span class="dc-call-incoming-icon" id="call-incoming-icon">📹</span>
+      <h3 class="dc-call-incoming-title" id="call-incoming-title">Videochiamata in arrivo</h3>
       <p class="dc-call-incoming-from" id="call-from-nick"></p>
       <div class="dc-call-incoming-actions">
         <button type="button" class="dc-btn dc-call-btn-accept" id="call-accept-btn">✓ Accetta</button>
@@ -136,6 +143,6 @@
   <!-- Toast container -->
   <div id="toast-container" class="dc-toast-container" aria-live="polite"></div>
 
-  <script src="/static/js/chat.js?v=6"></script>
+  <script src="/static/js/chat.js?v=8"></script>
 </body>
 </html>
