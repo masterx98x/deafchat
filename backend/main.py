@@ -64,7 +64,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "no-referrer"
-        response.headers["Permissions-Policy"] = "camera=(self), microphone=(self), geolocation=()"
+        # Permissions-Policy omesso: Cloudflare può sovrascriverlo.
+        # camera e microphone sono permessi di default senza questo header.
         # S5: HSTS – forza HTTPS
         response.headers["Strict-Transport-Security"] = (
             "max-age=63072000; includeSubDomains"
