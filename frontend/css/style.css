@@ -590,18 +590,22 @@ img { max-width: 100%; height: auto; }
   backdrop-filter: var(--dc-blur);
   gap: .5rem;
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 .dc-chat-header-left {
   display: flex;
   align-items: center;
   gap: .75rem;
   min-width: 0;
+  flex: 1 1 auto;
 }
 .dc-chat-header-right {
   display: flex;
   align-items: center;
   gap: .4rem;
   flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 .dc-chat-back {
   font-size: 1.25rem;

@@ -245,7 +245,7 @@ async def handle_websocket(ws: WebSocket, room_id: str) -> None:
                 if len(image_data) > settings.max_image_size:
                     await _send(ws, WSOutgoing(
                         type=WSMessageType.error,
-                        content="Immagine troppo grande (max 1.5 MB).",
+                        content="Immagine troppo grande (max 10 MB).",
                         timestamp=_now_iso(),
                     ))
                     continue

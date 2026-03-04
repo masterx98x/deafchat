@@ -39,7 +39,7 @@ class Settings:
 
     # Images
     max_image_size: int = field(
-        default_factory=lambda: int(os.getenv("MAX_IMAGE_SIZE", "2000000"))  # ~2 MB base64
+        default_factory=lambda: int(os.getenv("MAX_IMAGE_SIZE", "14000000"))  # ~10 MB file -> ~13.3 MB base64
     )
 
     # Security

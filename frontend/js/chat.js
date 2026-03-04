@@ -1086,7 +1086,7 @@
   }
 
   // Photo send
-  const MAX_IMAGE_SIZE = 1.5 * 1024 * 1024; // 1.5 MB raw file
+  const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB raw file
   if (photoBtn && photoInput) {
     photoBtn.addEventListener('click', () => photoInput.click());
     photoInput.addEventListener('change', async () => {
@@ -1098,7 +1098,7 @@
         return;
       }
       if (file.size > MAX_IMAGE_SIZE) {
-        showToast('Immagine troppo grande (max 1.5 MB).', 'warning');
+        showToast('Immagine troppo grande (max 10 MB).', 'warning');
         return;
       }
       // Read as base64
