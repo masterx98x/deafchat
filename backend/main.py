@@ -227,7 +227,11 @@ async def chat_page(room_id: str):
             status_code=404,
         )
     html_path = FRONTEND_DIR / "chat.html"
-    return HTMLResponse(content=html_path.read_text(encoding="utf-8"))
+    # S4: prevent search engines from indexing ephemeral chat pages
+    return HTMLResponse(
+        content=html_path.read_text(encoding="utf-8"),
+        headers={"X-Robots-Tag": "noindex, nofollow"},
+    )
 
 
 # Mount static files last so it doesn't shadow routes

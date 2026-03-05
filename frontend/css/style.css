@@ -3,7 +3,7 @@
    Visual language: DeafNews (Space Grotesk, blu futuristico, glassmorphism)
    ============================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+/* Font loaded via <link> in HTML for non-blocking rendering (S6) */
 
 /* ---------- Reset & Base ---------- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -462,6 +462,12 @@ img { max-width: 100%; height: auto; }
   border-top: 1px solid var(--dc-border);
   font-size: .8rem;
   color: var(--dc-text-soft);
+}
+.dc-footer-links {
+  margin-top: .4rem;
+  font-size: .75rem;
+  color: var(--dc-text-soft);
+  opacity: .8;
 }
 
 /* ---------- FAQ Section ---------- */

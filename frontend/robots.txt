@@ -3,5 +3,6 @@ Allow: /
 Disallow: /api/
 Disallow: /ws/
 Disallow: /health
+Disallow: /chat/
 
 Sitemap: https://deafchat.deafnews.it/sitemap.xml
