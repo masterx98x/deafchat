@@ -93,7 +93,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                 "font-src 'self' https://fonts.gstatic.com; "
                 "img-src 'self' data: blob:; "
                 "media-src 'self' blob:; "
-                f"connect-src 'self' {ws_scheme}; "
+                f"connect-src 'self' {ws_scheme} "
+                "stun: turn: turns: https://a.relay.metered.ca; "
                 "worker-src 'self'; "
                 "frame-ancestors 'none'"
             )

@@ -84,6 +84,11 @@
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
     { urls: 'stun:stun.cloudflare.com:3478' },
+    // TURN relay – needed when both peers are behind NAT (Docker, 4G, corporate)
+    { urls: 'turn:a.relay.metered.ca:80',      username: 'e43844a431499a65afaf498c', credential: '2fPbOOgaH7LB2MBg' },
+    { urls: 'turn:a.relay.metered.ca:80?transport=tcp',  username: 'e43844a431499a65afaf498c', credential: '2fPbOOgaH7LB2MBg' },
+    { urls: 'turn:a.relay.metered.ca:443',     username: 'e43844a431499a65afaf498c', credential: '2fPbOOgaH7LB2MBg' },
+    { urls: 'turns:a.relay.metered.ca:443',    username: 'e43844a431499a65afaf498c', credential: '2fPbOOgaH7LB2MBg' },
   ];
 
   // --- Adaptive bitrate (ABR) constants ---
@@ -1050,7 +1055,10 @@
   // --- Peer connection factory ---
 
   function createPeerConnection() {
-    peerConnection = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+    peerConnection = new RTCPeerConnection({
+      iceServers: ICE_SERVERS,
+      iceCandidatePoolSize: 1,
+    });
 
     peerConnection.onicecandidate = (event) => {
       if (event.candidate && ws && ws.readyState === WebSocket.OPEN) {
