@@ -10,6 +10,9 @@
 [hidden] { display: none !important; }
 
 :root {
+  /* Tell browser this page is already dark — prevents forced dark mode on Android */
+  color-scheme: dark;
+
   /* DeafNews palette – dark */
   --dc-bg:         #020617;
   --dc-bg-grad:    radial-gradient(circle at top, #0f172a 0%, #020617 50%, #000000 100%);
@@ -1589,4 +1592,88 @@ img { max-width: 100%; height: auto; }
   .dc-radio-label { min-height: 44px; }
   .dc-member-item { min-height: 44px; }
   .dc-members-close { min-height: 44px; min-width: 44px; display: flex; align-items: center; justify-content: center; }
+}
+
+/* =============================================================
+   System dark mode – contrast boost
+   Prevents washed-out text on devices (e.g. Samsung) where the
+   browser applies additional forced-dark-mode transformations.
+   ============================================================= */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --dc-text:       #f8fafc;
+    --dc-text-soft:  #c8d0e0;
+    --dc-border:     rgba(71, 85, 105, 1);
+    --dc-bg-input:   rgba(15, 23, 42, 0.95);
+    --dc-bg-card:    rgba(15, 23, 42, 0.8);
+    --dc-accent-light: #56ccfc;
+  }
+
+  /* Body text: force high-contrast white */
+  body.dc-body {
+    -webkit-text-fill-color: initial;
+    color: #f8fafc;
+  }
+
+  /* Hero & FAQ gradient text: use solid high-contrast fallback */
+  .dc-hero-title {
+    -webkit-text-fill-color: #e0f2fe;
+    color: #e0f2fe;
+  }
+  .dc-faq-title {
+    -webkit-text-fill-color: #e0f2fe;
+    color: #e0f2fe;
+  }
+
+  /* Descriptions & secondary text */
+  .dc-hero-desc { color: #e8ecf2; }
+  .dc-tagline { color: #a8b4c4; }
+  .dc-feature p { color: #d4dae4; }
+  .dc-feature h3 { color: #ffffff; }
+  .dc-faq-question { color: #eef2f7; }
+  .dc-faq-answer { color: #d4dae4; }
+  .dc-overlay-desc { color: #c0c8d8; }
+  .dc-footer { color: #b4bcd0; }
+
+  /* Labels & form elements */
+  .dc-label { color: #eef2f7; }
+  .dc-input { color: #f8fafc; }
+  .dc-input::placeholder { color: #94a3b8; opacity: 1; }
+  .dc-expiry-chip { color: #c0c8d8; }
+
+  /* Chat messages – ensure readability */
+  .dc-msg-mine .dc-msg-bubble { color: #f8fafc; }
+  .dc-msg-other .dc-msg-bubble { color: #f8fafc; background: #1e293b; }
+  .dc-msg-nick { color: #56ccfc; }
+  .dc-msg-time { color: #94a3b8; }
+  .dc-msg-system { color: #c0c8d8; background: rgba(30, 41, 59, 0.95); }
+
+  /* Members sidebar */
+  .dc-member-item { color: #f1f5f9; }
+  .dc-member-item em { color: #94a3b8; }
+
+  /* Chat header elements */
+  .dc-chat-room-name { color: #56ccfc; }
+  .dc-chat-members-count { color: #a8b4c4; }
+  .dc-chat-back { color: #e2e8f0; }
+
+  /* Buttons */
+  .dc-btn-ghost { color: #c8d0e0; }
+  .dc-btn-secondary { color: #f1f5f9; }
+
+  /* Audio player */
+  .dc-audio-duration { color: #a8b4c4; }
+
+  /* Toasts */
+  .dc-toast { color: #ffffff; }
+
+  /* Countdown */
+  .dc-countdown { color: #56ccfc; }
+
+  /* Recording bar */
+  .dc-rec-timer { color: #f8fafc; }
+
+  /* Links */
+  a { color: #a5c8f8; }
+  a:hover { color: #d0e4ff; }
 }
