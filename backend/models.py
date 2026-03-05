@@ -51,6 +51,7 @@ class WSMessageType(str, Enum):
     system = "system"
     error = "error"
     members = "members"
+    ping = "ping"           # C3: keep-alive
     # WebRTC video-call signaling (1-to-1 only)
     call_request = "call_request"
     call_accept = "call_accept"

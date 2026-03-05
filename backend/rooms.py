@@ -142,6 +142,9 @@ class RoomManager:
         room = self._rooms.get(room_id)
         if room is None:
             return False
+        # M3: enforce 2-person limit for private (1-to-1) rooms
+        if room.room_type == RoomType.private and room.member_count >= 2:
+            return False
         if room.member_count >= settings.max_room_members:
             return False
         room.members[ws_id] = Member(nickname=nickname, ws=ws)

@@ -17,6 +17,8 @@ from slowapi.util import get_remote_address
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
+import re
+
 from .config import settings
 from .models import ALLOWED_EXPIRY_MINUTES, CreateRoomRequest, CreateRoomResponse, RoomInfoResponse
 from .rooms import room_manager
@@ -24,6 +26,12 @@ from .ws import handle_websocket
 
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+
+# C2: room-ID format validation (lowercase alphanumeric, 10 chars)
+_ROOM_ID_RE = re.compile(r"^[a-z0-9]{10}$")
+
+def _valid_room_id(rid: str) -> bool:
+    return bool(_ROOM_ID_RE.match(rid))
 
 # --- Rate limiter (keyed by client IP) ---
 limiter = Limiter(key_func=get_remote_address)
@@ -64,8 +72,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "no-referrer"
-        # Permissions-Policy omesso: Cloudflare può sovrascriverlo.
-        # camera e microphone sono permessi di default senza questo header.
+        # M6: Permissions-Policy – restrict sensitive APIs
+        response.headers["Permissions-Policy"] = (
+            "camera=(self), microphone=(self), geolocation=(), payment=(), usb=()"
+        )
         # S5: HSTS – forza HTTPS
         response.headers["Strict-Transport-Security"] = (
             "max-age=63072000; includeSubDomains"
@@ -77,6 +87,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         if req_path not in ("/sitemap.xml", "/robots.txt"):
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; "
+                "script-src 'self'; "
                 "style-src 'self' https://fonts.googleapis.com; "
                 "font-src 'self' https://fonts.gstatic.com; "
                 "img-src 'self' data: blob:; "
@@ -85,6 +96,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                 "worker-src 'self'; "
                 "frame-ancestors 'none'"
             )
+        # L3: prevent caching of HTML pages
+        if req_path == "/" or req_path.startswith("/chat/"):
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
         return response
 
 
@@ -126,6 +140,9 @@ async def create_room(body: CreateRoomRequest, request: Request):
 @app.get("/api/rooms/{room_id}", response_model=RoomInfoResponse)
 @limiter.limit(settings.rate_limit_api)
 async def get_room_info(room_id: str, request: Request):
+    # C2: validate room_id format
+    if not _valid_room_id(room_id):
+        return JSONResponse(status_code=404, content={"detail": "Room not found"})
     room = room_manager.get_room(room_id)
     if room is None:
         return JSONResponse(status_code=404, content={"detail": "Room not found"})
@@ -192,7 +209,8 @@ async def landing_page():
 
 @app.get("/chat/{room_id}", response_class=HTMLResponse)
 async def chat_page(room_id: str):
-    if not room_manager.room_exists(room_id):
+    # C2: validate room_id format
+    if not _valid_room_id(room_id) or not room_manager.room_exists(room_id):
         # Serve 404 page or redirect – for now, lightweight error
         return HTMLResponse(
             content="""<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">
@@ -220,6 +238,7 @@ def run() -> None:
         host=settings.host,
         port=settings.port,
         reload=settings.is_dev,
+        ws_max_size=16 * 1024 * 1024,  # H1: 16 MB max WebSocket frame
     )
 
 

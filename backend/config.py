@@ -43,8 +43,9 @@ class Settings:
     )
 
     # Security
+    # C1: default empty = same-origin only (no wildcard)
     cors_origins: str = field(
-        default_factory=lambda: os.getenv("CORS_ORIGINS", "*")
+        default_factory=lambda: os.getenv("CORS_ORIGINS", "")
     )
     rate_limit_rooms: str = field(
         default_factory=lambda: os.getenv("RATE_LIMIT_ROOMS", "10/minute")

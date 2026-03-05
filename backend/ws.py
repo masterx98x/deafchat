@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+import re
 import time
 import uuid
 from collections import defaultdict
@@ -14,6 +16,9 @@ from .models import WSIncoming, WSMessageType, WSOutgoing
 from .rooms import room_manager
 from .models import RoomType
 
+# C2: room-ID validation
+_ROOM_ID_RE = re.compile(r"^[a-z0-9]{10}$")
+
 # --- S6: per-IP connection tracking ---
 _ip_connections: dict[str, int] = defaultdict(int)
 MAX_WS_PER_IP = 10
@@ -25,6 +30,22 @@ WS_MSG_BURST = 15   # max burst
 # --- Audio rate-limit (stricter) ---
 WS_AUDIO_RATE = 0.5   # 1 token every 2 seconds
 WS_AUDIO_BURST = 2    # max burst
+
+# --- H1: max raw WS message size (defense-in-depth) ---
+MAX_WS_RAW_SIZE = 15_000_000  # ~15 MB
+
+# --- H2: allowed audio MIME types ---
+ALLOWED_AUDIO_MIMES = (
+    "audio/webm", "audio/webm;codecs=opus", "audio/ogg;codecs=opus",
+    "audio/mp4", "audio/mpeg", "audio/ogg",
+)
+
+# --- H4: max signaling payload sizes ---
+MAX_SDP_SIZE = 65_536   # 64 KB
+MAX_ICE_SIZE = 2_048    # 2 KB
+
+# --- H5: join timeout ---
+JOIN_TIMEOUT = 10.0  # seconds
 
 
 class _TokenBucket:
@@ -84,11 +105,28 @@ def _now_iso() -> str:
 async def handle_websocket(ws: WebSocket, room_id: str) -> None:
     """Full lifecycle of a WebSocket connection to a chat room."""
 
+    # C2: validate room_id format
+    if not _ROOM_ID_RE.match(room_id):
+        await ws.close(code=4004, reason="Invalid room ID")
+        return
+
     # Verify room exists
     room = room_manager.get_room(room_id)
     if room is None:
         await ws.close(code=4004, reason="Room not found")
         return
+
+    # L4: WebSocket Origin check
+    origin = None
+    for header_name, header_value in ws.scope.get("headers", []):
+        if header_name == b"origin":
+            origin = header_value.decode("utf-8", errors="ignore")
+            break
+    allowed_origins = settings.cors_origin_list
+    if origin and allowed_origins:
+        if origin not in allowed_origins:
+            await ws.close(code=4006, reason="Origin not allowed")
+            return
 
     # S6: per-IP connection cap
     client_ip = ws.client.host if ws.client else "unknown"
@@ -104,8 +142,13 @@ async def handle_websocket(ws: WebSocket, room_id: str) -> None:
     audio_bucket = _TokenBucket(WS_AUDIO_RATE, WS_AUDIO_BURST)
 
     try:
-        # Wait for the join message
-        raw = await ws.receive_text()
+        # H5: Wait for the join message with timeout
+        try:
+            raw = await asyncio.wait_for(ws.receive_text(), timeout=JOIN_TIMEOUT)
+        except asyncio.TimeoutError:
+            await _send(ws, WSOutgoing(type=WSMessageType.error, content="Join timeout"))
+            await ws.close(code=4007, reason="Join timeout")
+            return
         try:
             incoming = WSIncoming.model_validate_json(raw)
         except Exception:
@@ -147,9 +190,26 @@ async def handle_websocket(ws: WebSocket, room_id: str) -> None:
         # Message loop
         while True:
             raw = await ws.receive_text()
+
+            # H1: defense-in-depth size check
+            if len(raw) > MAX_WS_RAW_SIZE:
+                await _send(ws, WSOutgoing(
+                    type=WSMessageType.error,
+                    content="Messaggio troppo grande.",
+                    timestamp=_now_iso(),
+                ))
+                continue
+
             try:
                 incoming = WSIncoming.model_validate_json(raw)
             except Exception:
+                continue
+
+            # C3: keep-alive ping
+            if incoming.type == WSMessageType.ping:
+                room = room_manager.get_room(room_id)
+                if room:
+                    room.touch()
                 continue
 
             if incoming.type == WSMessageType.message:
@@ -211,7 +271,14 @@ async def handle_websocket(ws: WebSocket, room_id: str) -> None:
                         timestamp=_now_iso(),
                     ))
                     continue
-
+                # H2: validate audio MIME type
+                if incoming.audio_mime and incoming.audio_mime not in ALLOWED_AUDIO_MIMES:
+                    await _send(ws, WSOutgoing(
+                        type=WSMessageType.error,
+                        content="Formato audio non supportato.",
+                        timestamp=_now_iso(),
+                    ))
+                    continue
                 room = room_manager.get_room(room_id)
                 if room:
                     room.touch()
@@ -291,6 +358,16 @@ async def handle_websocket(ws: WebSocket, room_id: str) -> None:
                         content="Le videochiamate sono disponibili solo nelle chat private 1-to-1.",
                         timestamp=_now_iso(),
                     ))
+                    continue
+
+                # H3: validate call_mode
+                if incoming.call_mode not in ("video", "voice"):
+                    continue
+
+                # H4: cap SDP/ICE payload size
+                if incoming.sdp and len(incoming.sdp) > MAX_SDP_SIZE:
+                    continue
+                if incoming.ice and len(incoming.ice) > MAX_ICE_SIZE:
                     continue
 
                 # Forward the signaling message to the other peer

@@ -1490,17 +1490,32 @@
   let _currentImagePreviewUrl = null;
 
   function _appendImagePlaceholder(id, previewUrl) {
+    // M2: use DOM API instead of innerHTML to avoid URL injection
     const wrapper = document.createElement('div');
     wrapper.className = 'dc-msg dc-msg-mine';
     wrapper.id = id;
-    wrapper.innerHTML = `
-      <div class="dc-msg-bubble dc-msg-image-bubble dc-img-loading">
-        <div class="dc-img-preview-wrap">
-          <img src="${previewUrl}" class="dc-msg-image dc-img-uploading" alt="Invio foto..." />
-          <div class="dc-img-spinner"><div class="dc-spinner"></div></div>
-        </div>
-        <span class="dc-msg-time">Invio...</span>
-      </div>`;
+    const bubble = document.createElement('div');
+    bubble.className = 'dc-msg-bubble dc-msg-image-bubble dc-img-loading';
+    const previewWrap = document.createElement('div');
+    previewWrap.className = 'dc-img-preview-wrap';
+    const img = document.createElement('img');
+    img.src = previewUrl;
+    img.className = 'dc-msg-image dc-img-uploading';
+    img.alt = 'Invio foto...';
+    img.draggable = false;
+    previewWrap.appendChild(img);
+    const spinnerWrap = document.createElement('div');
+    spinnerWrap.className = 'dc-img-spinner';
+    const spinner = document.createElement('div');
+    spinner.className = 'dc-spinner';
+    spinnerWrap.appendChild(spinner);
+    previewWrap.appendChild(spinnerWrap);
+    bubble.appendChild(previewWrap);
+    const timeEl = document.createElement('span');
+    timeEl.className = 'dc-msg-time';
+    timeEl.textContent = 'Invio...';
+    bubble.appendChild(timeEl);
+    wrapper.appendChild(bubble);
     messagesDiv.appendChild(wrapper);
     scrollToBottom();
   }
@@ -1560,11 +1575,10 @@
     }
   });
 
-  // --- Keep-alive ping to prevent idle disconnection ---
+  // --- C3: Keep-alive ping to prevent idle disconnection ---
   setInterval(() => {
     if (ws && ws.readyState === WebSocket.OPEN) {
-      // Send a no-op to keep the connection alive
-      try { ws.send(JSON.stringify({ type: 'message', content: '' })); } catch {}
+      try { ws.send(JSON.stringify({ type: 'ping' })); } catch {}
     }
   }, 25000);
 
