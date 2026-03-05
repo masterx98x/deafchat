@@ -489,6 +489,14 @@
         showToast('Stanza piena.', 'error');
         return;
       }
+      if (event.code === 4005) {
+        showToast('Troppe connessioni. Chiudi altre schede e riprova.', 'error');
+        return;
+      }
+      if (event.code === 4006) {
+        showToast('Origine non consentita.', 'error');
+        return;
+      }
       // Attempt reconnect
       if (reconnectAttempts < MAX_RECONNECT) {
         reconnectAttempts++;

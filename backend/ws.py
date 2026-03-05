@@ -125,18 +125,8 @@ def _now_iso() -> str:
 async def handle_websocket(ws: WebSocket, room_id: str) -> None:
     """Full lifecycle of a WebSocket connection to a chat room."""
 
-    # C2: validate room_id format
-    if not _ROOM_ID_RE.match(room_id):
-        await ws.close(code=4004, reason="Invalid room ID")
-        return
-
-    # Verify room exists
-    room = room_manager.get_room(room_id)
-    if room is None:
-        await ws.close(code=4004, reason="Room not found")
-        return
-
     # L4: WebSocket Origin check (V2: stricter – reject missing origin when origins configured)
+    # NOTE: origin check runs pre-accept; on failure we reject the HTTP upgrade (no WS frame).
     origin = None
     for header_name, header_value in ws.scope.get("headers", []):
         if header_name == b"origin":
@@ -159,7 +149,20 @@ async def handle_websocket(ws: WebSocket, room_id: str) -> None:
         await ws.close(code=4005, reason="Too many connections")
         return
 
+    # Accept first so the client receives proper close codes for room-level errors
     await ws.accept()
+
+    # C2: validate room_id format
+    if not _ROOM_ID_RE.match(room_id):
+        await ws.close(code=4004, reason="Invalid room ID")
+        return
+
+    # Verify room exists
+    room = room_manager.get_room(room_id)
+    if room is None:
+        await ws.close(code=4004, reason="Room not found")
+        return
+
     ws_id = str(uuid.uuid4())
     nickname: str | None = None
     bucket = _TokenBucket(WS_MSG_RATE, WS_MSG_BURST)
