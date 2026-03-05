@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeafChat – TURN Connectivity Test</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #1a1a2e; color: #e0e0e0; padding: 24px; }
+    h1 { color: #00d4ff; margin-bottom: 16px; font-size: 1.4rem; }
+    .card { background: #16213e; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .card h2 { font-size: 1rem; color: #00d4ff; margin-bottom: 12px; }
+    #log { font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.6; white-space: pre-wrap; word-break: break-all; max-height: 400px; overflow-y: auto; background: #0f0f23; border-radius: 8px; padding: 12px; }
+    .ok { color: #4caf50; } .warn { color: #ff9800; } .err { color: #f44336; } .info { color: #90caf9; }
+    button { background: #00d4ff; color: #1a1a2e; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem; margin-right: 8px; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .summary { margin-top: 12px; padding: 12px; border-radius: 8px; font-weight: 600; }
+    .summary.pass { background: #1b5e20; color: #a5d6a7; }
+    .summary.fail { background: #b71c1c; color: #ef9a9a; }
+    .summary.partial { background: #e65100; color: #ffcc80; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    td, th { padding: 6px 10px; text-align: left; border-bottom: 1px solid #233; font-size: 0.85rem; }
+    th { color: #00d4ff; }
+  </style>
+</head>
+<body>
+  <h1>🔧 TURN Connectivity Test</h1>
+
+  <div class="card">
+    <h2>1. Configurazione ICE dal server</h2>
+    <div id="ice-config">Caricamento...</div>
+  </div>
+
+  <div class="card">
+    <h2>2. Test connettività</h2>
+    <button id="btn-test" disabled>Avvia test</button>
+    <button id="btn-clear" onclick="document.getElementById('log').innerHTML=''">Pulisci log</button>
+    <div id="log"></div>
+    <div id="summary"></div>
+  </div>
+
+<script>
+(function() {
+  'use strict';
+  var logEl = document.getElementById('log');
+  var summaryEl = document.getElementById('summary');
+  var configEl = document.getElementById('ice-config');
+  var btnTest = document.getElementById('btn-test');
+  var iceServers = [];
+
+  function log(msg, cls) {
+    var span = document.createElement('span');
+    span.className = cls || 'info';
+    span.textContent = msg + '\n';
+    logEl.appendChild(span);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  // Load ICE config from the server
+  fetch('/api/ice-config').then(function(r) { return r.json(); }).then(function(data) {
+    iceServers = data.iceServers || [];
+    var html = '<table><tr><th>URL</th><th>Username</th></tr>';
+    iceServers.forEach(function(s) {
+      html += '<tr><td>' + (Array.isArray(s.urls) ? s.urls.join(', ') : s.urls) + '</td><td>' + (s.username || '–') + '</td></tr>';
+    });
+    html += '</table>';
+    configEl.innerHTML = html;
+    btnTest.disabled = false;
+
+    var hasTurn = iceServers.some(function(s) {
+      var u = Array.isArray(s.urls) ? s.urls.join(' ') : s.urls;
+      return u.indexOf('turn:') === 0 || u.indexOf('turns:') === 0;
+    });
+    if (!hasTurn) {
+      configEl.innerHTML += '<p class="err" style="margin-top:8px">⚠ Nessun server TURN configurato! Solo STUN → le chiamate su 4G/5G non funzioneranno.</p>';
+    }
+  }).catch(function(e) {
+    configEl.innerHTML = '<span class="err">Errore nel caricamento: ' + e.message + '</span>';
+  });
+
+  btnTest.addEventListener('click', runTest);
+
+  function runTest() {
+    btnTest.disabled = true;
+    summaryEl.innerHTML = '';
+    logEl.innerHTML = '';
+    log('═══ TURN Connectivity Test ═══', 'info');
+    log('Timestamp: ' + new Date().toISOString(), 'info');
+    log('User-Agent: ' + navigator.userAgent, 'info');
+    log('');
+
+    var results = { host: false, srflx: false, relay: false };
+    var candidateDetails = [];
+
+    // Use only TURN+STUN servers (not just STUN) so we can test relay allocation
+    var pc = new RTCPeerConnection({ iceServers: iceServers, iceCandidatePoolSize: 0 });
+
+    // Create a dummy data channel to trigger ICE gathering
+    pc.createDataChannel('turn-test');
+
+    var timeout = setTimeout(function() {
+      log('');
+      log('⏱ Timeout raggiunto (15s) – gathering incompleto', 'warn');
+      finish();
+    }, 15000);
+
+    pc.onicecandidate = function(e) {
+      if (!e.candidate) {
+        log('');
+        log('✓ ICE gathering completato', 'ok');
+        clearTimeout(timeout);
+        finish();
+        return;
+      }
+      var c = e.candidate;
+      var type = c.type || 'unknown';
+      results[type] = true;
+      var detail = type + ' | ' + (c.protocol || '?') + ' | ' + (c.address || '?') + ':' + (c.port || '?');
+      if (c.relatedAddress) detail += ' (relay da ' + c.relatedAddress + ':' + c.relatedPort + ')';
+      if (c.url) detail += ' [via ' + c.url + ']';
+      candidateDetails.push({ type: type, line: detail });
+
+      var cls = type === 'relay' ? 'ok' : 'info';
+      log('  Candidato: ' + detail, cls);
+    };
+
+    pc.onicegatheringstatechange = function() {
+      log('Gathering state → ' + pc.iceGatheringState, 'info');
+    };
+
+    pc.createOffer().then(function(offer) {
+      log('Offer SDP creato, avvio ICE gathering...', 'info');
+      log('');
+      return pc.setLocalDescription(offer);
+    }).catch(function(err) {
+      log('Errore nella creazione dell\'offer: ' + err.message, 'err');
+      clearTimeout(timeout);
+      finish();
+    });
+
+    function finish() {
+      try { pc.close(); } catch(e) {}
+
+      log('');
+      log('═══ Risultati ═══', 'info');
+      log('  host  (LAN):   ' + (results.host  ? '✓ trovato' : '✗ non trovato'), results.host  ? 'ok' : 'warn');
+      log('  srflx (STUN):  ' + (results.srflx ? '✓ trovato' : '✗ non trovato'), results.srflx ? 'ok' : 'warn');
+      log('  relay (TURN):  ' + (results.relay  ? '✓ trovato' : '✗ NON TROVATO'), results.relay  ? 'ok' : 'err');
+
+      if (results.relay) {
+        summaryEl.className = 'summary pass';
+        summaryEl.textContent = '✓ TURN funzionante! Le videochiamate dovrebbero funzionare anche su 4G/5G.';
+      } else if (results.srflx) {
+        summaryEl.className = 'summary partial';
+        summaryEl.innerHTML = '⚠ STUN funziona ma TURN NO.<br>Possibili cause:<br>' +
+          '• coturn non è in esecuzione (controlla: docker ps)<br>' +
+          '• Porte 3478 UDP/TCP chiuse nel firewall<br>' +
+          '• Porte relay 49152-65535 UDP chiuse<br>' +
+          '• Credenziali TURN errate';
+      } else {
+        summaryEl.className = 'summary fail';
+        summaryEl.innerHTML = '✗ Nessun candidato STUN/TURN trovato.<br>' +
+          'La rete potrebbe bloccare tutte le connessioni ICE.<br>' +
+          'Controlla firewall e configurazione di rete.';
+      }
+
+      btnTest.disabled = false;
+    }
+  }
+})();
+</script>
+</body>
+</html>

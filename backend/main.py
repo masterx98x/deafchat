@@ -173,12 +173,11 @@ async def ice_config(request: Request):
         user = settings.turn_username
         pwd = settings.turn_password
         port = settings.turn_port
-        tls_port = settings.turn_tls_port
+        # UDP (standard) + TCP fallback on the same port.
+        # turns: entries are omitted until a TLS certificate is configured in coturn.
         servers.extend([
             {"urls": f"turn:{turn_host}:{port}",                  "username": user, "credential": pwd},
             {"urls": f"turn:{turn_host}:{port}?transport=tcp",    "username": user, "credential": pwd},
-            {"urls": f"turn:{turn_host}:{tls_port}",              "username": user, "credential": pwd},
-            {"urls": f"turns:{turn_host}:{tls_port}",             "username": user, "credential": pwd},
         ])
     return {"iceServers": servers}
 
@@ -231,6 +230,13 @@ async def sitemap_xml():
 @app.get("/", response_class=HTMLResponse)
 async def landing_page():
     html_path = FRONTEND_DIR / "index.html"
+    return HTMLResponse(content=html_path.read_text(encoding="utf-8"))
+
+
+@app.get("/turn-test", response_class=HTMLResponse)
+async def turn_test_page():
+    """Pagina diagnostica per verificare la connettività TURN."""
+    html_path = FRONTEND_DIR / "turn-test.html"
     return HTMLResponse(content=html_path.read_text(encoding="utf-8"))
 
 

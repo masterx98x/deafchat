@@ -1062,18 +1062,41 @@
   // --- Peer connection factory ---
 
   function createPeerConnection() {
+    console.log('[WebRTC] Creating PeerConnection with ICE servers:', JSON.stringify(ICE_SERVERS));
     peerConnection = new RTCPeerConnection({
       iceServers: ICE_SERVERS,
       iceCandidatePoolSize: 1,
     });
 
+    // ── ICE candidate debug tracking ──
+    var _candidateCounts = { host: 0, srflx: 0, relay: 0, prflx: 0 };
+
     peerConnection.onicecandidate = (event) => {
-      if (event.candidate && ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({
-          type: 'call_ice',
-          ice: JSON.stringify(event.candidate),
-        }));
+      if (event.candidate) {
+        var c = event.candidate;
+        var cType = c.type || 'unknown';
+        _candidateCounts[cType] = (_candidateCounts[cType] || 0) + 1;
+        console.log('[WebRTC] ICE candidate:', cType, c.protocol, c.address + ':' + c.port,
+          c.relatedAddress ? '(relay via ' + c.relatedAddress + ')' : '');
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({
+            type: 'call_ice',
+            ice: JSON.stringify(event.candidate),
+          }));
+        }
+      } else {
+        // Gathering complete
+        console.log('[WebRTC] ICE gathering complete. Candidates:', JSON.stringify(_candidateCounts));
+        if (_candidateCounts.relay === 0) {
+          console.warn('[WebRTC] ⚠ Nessun candidato TURN relay trovato! Il TURN server potrebbe non essere raggiungibile.');
+          console.warn('[WebRTC] Verifica: 1) coturn è in esecuzione  2) porte 3478 UDP/TCP aperte  3) credenziali corrette');
+        }
       }
+    };
+
+    peerConnection.onicegatheringstatechange = () => {
+      if (!peerConnection) return;
+      console.log('[WebRTC] ICE gathering state:', peerConnection.iceGatheringState);
     };
 
     peerConnection.ontrack = (event) => {
