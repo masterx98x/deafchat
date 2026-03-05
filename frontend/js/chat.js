@@ -83,8 +83,10 @@
   // ICE servers – loaded dynamically from /api/ice-config (includes TURN)
   let ICE_SERVERS = [
     { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
   ];
+
+  // When true, force relay-only ICE (used as fallback after first connection failure)
+  let _forceRelay = false;
 
   async function loadIceConfig() {
     try {
@@ -1044,6 +1046,15 @@
   async function _attemptIceRestart() {
     if (!peerConnection || !isCaller) return;
     _iceRestartCount++;
+
+    // After first failed attempt → switch to relay-only mode
+    if (_iceRestartCount >= 2 && !_forceRelay) {
+      console.log('[WebRTC] Switching to RELAY-ONLY mode for reconnection attempt', _iceRestartCount);
+      _forceRelay = true;
+      await _relayOnlyReconnect();
+      return;
+    }
+
     videocallStatus.textContent = 'Riconnessione... (' + _iceRestartCount + '/' + MAX_ICE_RESTARTS + ')';
     try {
       const offer = await peerConnection.createOffer({ iceRestart: true });
@@ -1054,6 +1065,47 @@
       _startIceTimeout();
     } catch (e) {
       console.error('[WebRTC] ICE restart failed:', e);
+      // Fall back to relay-only reconnect
+      if (!_forceRelay) {
+        _forceRelay = true;
+        await _relayOnlyReconnect();
+      } else {
+        showToast('Riconnessione fallita.', 'error');
+        endCall(true);
+      }
+    }
+  }
+
+  // Full reconnection using relay-only transport policy (TURN forced)
+  async function _relayOnlyReconnect() {
+    if (!isCaller || !isInCall) return;
+    videocallStatus.textContent = 'Riconnessione via relay...';
+    console.log('[WebRTC] Relay-only reconnect: destroying old PC, creating new one');
+
+    // Close old peer connection but keep local stream
+    _stopStatsMonitor();
+    _clearIceTimeout();
+    if (_iceRestartTimer) { clearTimeout(_iceRestartTimer); _iceRestartTimer = null; }
+    if (peerConnection) {
+      peerConnection.oniceconnectionstatechange = null;
+      peerConnection.onconnectionstatechange = null;
+      peerConnection.ontrack = null;
+      peerConnection.onicecandidate = null;
+      peerConnection.close();
+      peerConnection = null;
+    }
+
+    // Recreate with relay-only policy
+    createPeerConnection();
+
+    try {
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'call_offer', sdp: JSON.stringify(offer) }));
+      }
+    } catch (err) {
+      console.error('[WebRTC] Relay-only reconnect failed:', err);
       showToast('Riconnessione fallita.', 'error');
       endCall(true);
     }
@@ -1062,11 +1114,16 @@
   // --- Peer connection factory ---
 
   function createPeerConnection() {
-    console.log('[WebRTC] Creating PeerConnection with ICE servers:', JSON.stringify(ICE_SERVERS));
-    peerConnection = new RTCPeerConnection({
+    var rtcConfig = {
       iceServers: ICE_SERVERS,
-      iceCandidatePoolSize: 1,
-    });
+      iceCandidatePoolSize: 2,
+    };
+    if (_forceRelay) {
+      rtcConfig.iceTransportPolicy = 'relay';
+    }
+    console.log('[WebRTC] Creating PeerConnection –', _forceRelay ? 'RELAY-ONLY mode' : 'normal mode',
+      '| servers:', JSON.stringify(ICE_SERVERS));
+    peerConnection = new RTCPeerConnection(rtcConfig);
 
     // ── ICE candidate debug tracking ──
     var _candidateCounts = { host: 0, srflx: 0, relay: 0, prflx: 0 };
@@ -1214,6 +1271,7 @@
     videoEnabled = true;
     currentCallMode = 'video';
     _iceRestartCount = 0;
+    _forceRelay = false;
     _currentVideoBitrate = VIDEO_BITRATE_HIGH;
     _consecutivePoorStats = 0;
     _consecutiveGoodStats = 0;

@@ -166,7 +166,6 @@ async def ice_config(request: Request):
     """Return ICE servers list for WebRTC peer connections."""
     servers = [
         {"urls": "stun:stun.l.google.com:19302"},
-        {"urls": "stun:stun1.l.google.com:19302"},
     ]
     turn_host = settings.turn_host
     if turn_host:

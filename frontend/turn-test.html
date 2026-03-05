@@ -100,9 +100,9 @@
 
     var timeout = setTimeout(function() {
       log('');
-      log('⏱ Timeout raggiunto (15s) – gathering incompleto', 'warn');
+      log('⏱ Timeout raggiunto (20s) – gathering incompleto', 'warn');
       finish();
-    }, 15000);
+    }, 20000);
 
     pc.onicecandidate = function(e) {
       if (!e.candidate) {
