@@ -128,15 +128,30 @@ async def handle_websocket(ws: WebSocket, room_id: str) -> None:
     # L4: WebSocket Origin check (V2: stricter – reject missing origin when origins configured)
     # NOTE: origin check runs pre-accept; on failure we reject the HTTP upgrade (no WS frame).
     origin = None
+    host_header = None
     for header_name, header_value in ws.scope.get("headers", []):
         if header_name == b"origin":
             origin = header_value.decode("utf-8", errors="ignore")
-            break
-    allowed_origins = settings.cors_origin_list
-    if allowed_origins:
-        if not origin or origin not in allowed_origins:
-            await ws.close(code=4006, reason="Origin not allowed")
-            return
+        elif header_name == b"host":
+            host_header = header_value.decode("utf-8", errors="ignore")
+
+    # Allow same-origin requests: origin's host matches the Host header
+    is_same_origin = False
+    if origin and host_header:
+        try:
+            from urllib.parse import urlparse
+            parsed = urlparse(origin)
+            origin_host = parsed.netloc  # e.g. "example.com:8000"
+            is_same_origin = origin_host == host_header
+        except Exception:
+            pass
+
+    if not is_same_origin:
+        allowed_origins = settings.cors_origin_list
+        if allowed_origins:
+            if not origin or origin not in allowed_origins:
+                await ws.close(code=4006, reason="Origin not allowed")
+                return
 
     # V12: reject connections without identifiable client IP
     if not ws.client or not ws.client.host:
