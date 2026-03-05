@@ -83,8 +83,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # S7: CSP – skip override for XML/txt files (sitemap, robots)
         req_path = request.url.path
         if req_path not in ("/sitemap.xml", "/robots.txt"):
-            # V1: restrict connect-src to wss: only in production
-            ws_scheme = "ws: wss:" if settings.is_dev else "wss:"
+            # V1: restrict connect-src – auto-detect scheme from request
+            is_https = request.url.scheme == "https" or request.headers.get("x-forwarded-proto") == "https"
+            ws_scheme = "wss:" if is_https else "ws: wss:"
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; "
                 "script-src 'self'; "
