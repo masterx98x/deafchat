@@ -86,6 +86,28 @@
     { urls: 'stun:stun.cloudflare.com:3478' },
   ];
 
+  // --- Adaptive bitrate (ABR) constants ---
+  const ABR_CHECK_INTERVAL = 3000;        // poll stats every 3 s
+  const ICE_CONNECTION_TIMEOUT = 20000;   // 20 s to establish connection
+  const ICE_RESTART_DELAY = 3000;         // wait before ICE restart attempt
+  const MAX_ICE_RESTARTS = 3;
+  const VIDEO_BITRATE_HIGH = 1500000;     // 1.5 Mbps
+  const VIDEO_BITRATE_MEDIUM = 800000;    // 800 kbps
+  const VIDEO_BITRATE_LOW = 400000;       // 400 kbps
+  const VIDEO_BITRATE_MINIMUM = 150000;   // 150 kbps
+
+  // ABR state
+  let _statsInterval = null;
+  let _iceTimeout = null;
+  let _iceRestartTimer = null;
+  let _iceRestartCount = 0;
+  let _lastBytesSent = 0;
+  let _lastBytesReceived = 0;
+  let _lastStatsTime = 0;
+  let _currentVideoBitrate = VIDEO_BITRATE_HIGH;
+  let _consecutivePoorStats = 0;
+  let _consecutiveGoodStats = 0;
+
   // --- Service Worker registration ---
   async function registerSW() {
     if ('serviceWorker' in navigator) {
@@ -119,6 +141,52 @@
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible' && !_wakeLockRef) {
       acquireWakeLock();
+    }
+  });
+
+  // --- Screenshot / screen-capture prevention ---
+  // 1. Disable right-click context menu on chat
+  document.addEventListener('contextmenu', (e) => {
+    if (chatApp && !chatApp.hidden) {
+      e.preventDefault();
+    }
+  });
+  // 2. Block common screenshot keyboard shortcuts
+  document.addEventListener('keyup', (e) => {
+    if (chatApp && !chatApp.hidden && e.key === 'PrintScreen') {
+      // Overwrite clipboard with empty content
+      navigator.clipboard.writeText('').catch(() => {});
+      showToast('Screenshot non consentito.', 'warning');
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (chatApp && !chatApp.hidden) {
+      // PrintScreen alone
+      if (e.key === 'PrintScreen') {
+        e.preventDefault();
+        navigator.clipboard.writeText('').catch(() => {});
+        showToast('Screenshot non consentito.', 'warning');
+      }
+      // Ctrl+Shift+S (Win snippet), Cmd+Shift+3/4/5 (Mac)
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 's' || e.key === 'S' || e.key === '3' || e.key === '4' || e.key === '5')) {
+        e.preventDefault();
+        showToast('Screenshot non consentito.', 'warning');
+      }
+    }
+  });
+  // 3. Blur chat content when page loses visibility (tab switch / screen capture)
+  document.addEventListener('visibilitychange', () => {
+    if (!chatApp || chatApp.hidden) return;
+    if (document.visibilityState === 'hidden') {
+      messagesDiv.classList.add('dc-blur-protect');
+    } else {
+      messagesDiv.classList.remove('dc-blur-protect');
+    }
+  });
+  // 4. Block drag on images
+  document.addEventListener('dragstart', (e) => {
+    if (e.target && e.target.tagName === 'IMG' && chatApp && !chatApp.hidden) {
+      e.preventDefault();
     }
   });
 
@@ -511,6 +579,39 @@
 
   function appendImageMessage(msg) {
     const isMe = msg.nickname === nickname;
+
+    // If this is our own image and we have a pending placeholder, replace it
+    if (isMe && _currentImagePlaceholder) {
+      const placeholder = document.getElementById(_currentImagePlaceholder);
+      if (placeholder) {
+        if (_currentImagePreviewUrl) URL.revokeObjectURL(_currentImagePreviewUrl);
+        _currentImagePlaceholder = null;
+        _currentImagePreviewUrl = null;
+        // Replace placeholder with final message
+        const bubble = placeholder.querySelector('.dc-msg-bubble');
+        if (bubble) {
+          bubble.classList.remove('dc-img-loading');
+          const mime = msg.image_mime || 'image/jpeg';
+          bubble.innerHTML = '';
+          const img = document.createElement('img');
+          img.className = 'dc-msg-image';
+          img.alt = 'Foto';
+          img.src = `data:${mime};base64,${msg.image_data}`;
+          img.draggable = false;
+          img.addEventListener('click', () => _openImageFullscreen(img.src));
+          bubble.appendChild(img);
+          const timeEl = document.createElement('span');
+          timeEl.className = 'dc-msg-time';
+          timeEl.textContent = formatTime(msg.timestamp);
+          bubble.appendChild(timeEl);
+        }
+        scrollToBottom();
+        return;
+      }
+      _currentImagePlaceholder = null;
+      _currentImagePreviewUrl = null;
+    }
+
     const wrapper = document.createElement('div');
     wrapper.className = `dc-msg ${isMe ? 'dc-msg-mine' : 'dc-msg-other'}`;
 
@@ -530,14 +631,8 @@
     const mime = msg.image_mime || 'image/jpeg';
     img.src = `data:${mime};base64,${msg.image_data}`;
     img.loading = 'lazy';
-    // Click to open fullscreen
-    img.addEventListener('click', () => {
-      const overlay = document.createElement('div');
-      overlay.className = 'dc-img-fullscreen';
-      overlay.innerHTML = `<img src="${img.src}" alt="Foto" />`;
-      overlay.addEventListener('click', () => overlay.remove());
-      document.body.appendChild(overlay);
-    });
+    img.draggable = false;
+    img.addEventListener('click', () => _openImageFullscreen(img.src));
     bubble.appendChild(img);
 
     const timeEl = document.createElement('span');
@@ -552,6 +647,18 @@
     if (!isMe) {
       sendBrowserNotification(msg.nickname, '📷 Ha inviato una foto');
     }
+  }
+
+  function _openImageFullscreen(src) {
+    const overlay = document.createElement('div');
+    overlay.className = 'dc-img-fullscreen';
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = 'Foto';
+    img.draggable = false;
+    overlay.appendChild(img);
+    overlay.addEventListener('click', () => overlay.remove());
+    document.body.appendChild(overlay);
   }
 
   function appendAudioMessage(msg) {
@@ -720,9 +827,10 @@
     const wantVideo = mode === 'video';
 
     if (wantVideo) {
-      // Try video + audio first
+      // Try video + audio first (start at 640×480 for faster connection)
+      const videoConstraints = { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 24, max: 30 } };
       try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: true });
       } catch (videoErr) {
         console.warn('Video+audio failed, trying audio only:', videoErr.name, videoErr.message);
         // Fallback: audio only
@@ -767,6 +875,172 @@
     return localStream;
   }
 
+  // --- ABR helper functions ---
+
+  async function _applyVideoBitrate(sender, maxBitrate) {
+    if (!sender || !sender.setParameters) return;
+    try {
+      const params = sender.getParameters();
+      if (!params.encodings || params.encodings.length === 0) {
+        params.encodings = [{}];
+      }
+      params.encodings[0].maxBitrate = Math.round(maxBitrate);
+      if (maxBitrate <= VIDEO_BITRATE_MINIMUM) {
+        params.encodings[0].scaleResolutionDownBy = 4;
+      } else if (maxBitrate <= VIDEO_BITRATE_LOW) {
+        params.encodings[0].scaleResolutionDownBy = 2;
+      } else {
+        delete params.encodings[0].scaleResolutionDownBy;
+      }
+      await sender.setParameters(params);
+    } catch (e) {
+      console.warn('[ABR] setParameters failed:', e);
+    }
+  }
+
+  function _updateQualityIndicator() {
+    if (!isInCall) return;
+    if (_currentVideoBitrate >= VIDEO_BITRATE_HIGH * 0.8) {
+      videocallStatus.textContent = 'In chiamata \u2022 \u2705 Qualit\u00e0 alta';
+    } else if (_currentVideoBitrate >= VIDEO_BITRATE_MEDIUM * 0.8) {
+      videocallStatus.textContent = 'In chiamata \u2022 \u26A0\uFE0F Qualit\u00e0 media';
+    } else if (_currentVideoBitrate >= VIDEO_BITRATE_LOW * 0.8) {
+      videocallStatus.textContent = 'In chiamata \u2022 \u26A0\uFE0F Qualit\u00e0 bassa';
+    } else {
+      videocallStatus.textContent = 'In chiamata \u2022 \u274C Qualit\u00e0 minima';
+    }
+  }
+
+  function _adaptBitrate(sendBps, recvBps, rtt, lossRate) {
+    const isPoor = (rtt !== null && rtt > 0.3) || lossRate > 0.05;
+    const isVeryPoor = (rtt !== null && rtt > 0.5) || lossRate > 0.15;
+    const isGood = (rtt === null || rtt < 0.15) && lossRate < 0.02;
+
+    if (isVeryPoor) { _consecutivePoorStats += 2; _consecutiveGoodStats = 0; }
+    else if (isPoor) { _consecutivePoorStats++; _consecutiveGoodStats = 0; }
+    else if (isGood) { _consecutiveGoodStats++; _consecutivePoorStats = 0; }
+    else { _consecutivePoorStats = Math.max(0, _consecutivePoorStats - 1); _consecutiveGoodStats = Math.max(0, _consecutiveGoodStats - 1); }
+
+    let target = _currentVideoBitrate;
+
+    // Downgrade after 2 consecutive poor readings
+    if (_consecutivePoorStats >= 2) {
+      target = Math.max(VIDEO_BITRATE_MINIMUM, Math.round(_currentVideoBitrate / 2));
+      _consecutivePoorStats = 0;
+    }
+    // Upgrade after 5 consecutive good readings
+    if (_consecutiveGoodStats >= 5) {
+      target = Math.min(VIDEO_BITRATE_HIGH, Math.round(_currentVideoBitrate * 1.5));
+      _consecutiveGoodStats = 0;
+    }
+
+    if (target !== _currentVideoBitrate) {
+      _currentVideoBitrate = target;
+      if (peerConnection) {
+        peerConnection.getSenders().forEach(s => {
+          if (s.track && s.track.kind === 'video') _applyVideoBitrate(s, _currentVideoBitrate);
+        });
+      }
+      _updateQualityIndicator();
+      console.log('[ABR] bitrate →', Math.round(_currentVideoBitrate / 1000), 'kbps  rtt=' + (rtt !== null ? (rtt * 1000).toFixed(0) + 'ms' : '?') + '  loss=' + (lossRate * 100).toFixed(1) + '%');
+    }
+  }
+
+  function _startStatsMonitor() {
+    _stopStatsMonitor();
+    _lastStatsTime = performance.now();
+    _lastBytesSent = 0;
+    _lastBytesReceived = 0;
+
+    _statsInterval = setInterval(async () => {
+      if (!peerConnection) return;
+      try {
+        const stats = await peerConnection.getStats();
+        let totalBytesSent = 0, totalBytesReceived = 0;
+        let rtt = null, packetsLost = 0, packetsReceived = 0;
+
+        stats.forEach(r => {
+          if (r.type === 'candidate-pair' && r.state === 'succeeded') { rtt = r.currentRoundTripTime; }
+          if (r.type === 'outbound-rtp' && r.kind === 'video') { totalBytesSent = r.bytesSent || 0; }
+          if (r.type === 'inbound-rtp' && r.kind === 'video') {
+            totalBytesReceived = r.bytesReceived || 0;
+            packetsLost = r.packetsLost || 0;
+            packetsReceived = r.packetsReceived || 0;
+          }
+        });
+
+        const now = performance.now();
+        const elapsed = (now - _lastStatsTime) / 1000;
+        if (elapsed > 0 && _lastBytesSent > 0) {
+          const sendBps = ((totalBytesSent - _lastBytesSent) * 8) / elapsed;
+          const recvBps = ((totalBytesReceived - _lastBytesReceived) * 8) / elapsed;
+          const lossRate = (packetsLost + packetsReceived) > 0 ? packetsLost / (packetsLost + packetsReceived) : 0;
+          _adaptBitrate(sendBps, recvBps, rtt, lossRate);
+        }
+        _lastBytesSent = totalBytesSent;
+        _lastBytesReceived = totalBytesReceived;
+        _lastStatsTime = now;
+      } catch (e) { /* stats unavailable */ }
+    }, ABR_CHECK_INTERVAL);
+  }
+
+  function _stopStatsMonitor() {
+    if (_statsInterval) { clearInterval(_statsInterval); _statsInterval = null; }
+  }
+
+  // --- ICE timeout & restart helpers ---
+
+  function _startIceTimeout() {
+    _clearIceTimeout();
+    _iceTimeout = setTimeout(() => {
+      if (!peerConnection) return;
+      const st = peerConnection.iceConnectionState;
+      if (st !== 'connected' && st !== 'completed') {
+        console.warn('[WebRTC] ICE timeout – state:', st);
+        if (_iceRestartCount < MAX_ICE_RESTARTS && isCaller) {
+          _attemptIceRestart();
+        } else {
+          showToast('Impossibile stabilire la connessione. Verifica la rete e riprova.', 'error');
+          endCall(true);
+        }
+      }
+    }, ICE_CONNECTION_TIMEOUT);
+  }
+
+  function _clearIceTimeout() {
+    if (_iceTimeout) { clearTimeout(_iceTimeout); _iceTimeout = null; }
+  }
+
+  function _scheduleIceRestart() {
+    if (_iceRestartTimer) return;
+    _iceRestartTimer = setTimeout(() => {
+      _iceRestartTimer = null;
+      if (peerConnection && peerConnection.iceConnectionState === 'disconnected' && isCaller) {
+        _attemptIceRestart();
+      }
+    }, ICE_RESTART_DELAY);
+  }
+
+  async function _attemptIceRestart() {
+    if (!peerConnection || !isCaller) return;
+    _iceRestartCount++;
+    videocallStatus.textContent = 'Riconnessione... (' + _iceRestartCount + '/' + MAX_ICE_RESTARTS + ')';
+    try {
+      const offer = await peerConnection.createOffer({ iceRestart: true });
+      await peerConnection.setLocalDescription(offer);
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'call_offer', sdp: JSON.stringify(offer) }));
+      }
+      _startIceTimeout();
+    } catch (e) {
+      console.error('[WebRTC] ICE restart failed:', e);
+      showToast('Riconnessione fallita.', 'error');
+      endCall(true);
+    }
+  }
+
+  // --- Peer connection factory ---
+
   function createPeerConnection() {
     peerConnection = new RTCPeerConnection({ iceServers: ICE_SERVERS });
 
@@ -782,23 +1056,66 @@
     peerConnection.ontrack = (event) => {
       remoteVideo.srcObject = event.streams[0];
       videocallStatus.textContent = 'In chiamata';
+      _clearIceTimeout();
+      _startStatsMonitor();
     };
 
     peerConnection.oniceconnectionstatechange = () => {
+      if (!peerConnection) return;
       const state = peerConnection.iceConnectionState;
+      console.log('[WebRTC] ICE state:', state);
+
       if (state === 'connected' || state === 'completed') {
         videocallStatus.textContent = 'In chiamata';
-      } else if (state === 'disconnected' || state === 'failed' || state === 'closed') {
+        _clearIceTimeout();
+        _iceRestartCount = 0;
+        _startStatsMonitor();
+      } else if (state === 'checking') {
+        videocallStatus.textContent = 'Connessione in corso...';
+      } else if (state === 'disconnected') {
+        videocallStatus.textContent = 'Connessione instabile...';
+        _stopStatsMonitor();
+        _scheduleIceRestart();
+      } else if (state === 'failed') {
+        _stopStatsMonitor();
+        if (_iceRestartCount < MAX_ICE_RESTARTS && isCaller) {
+          _attemptIceRestart();
+        } else {
+          showToast('Connessione fallita. Verifica la rete e riprova.', 'error');
+          endCall(true);
+        }
+      } else if (state === 'closed') {
         endCall(false);
       }
     };
 
-    // Add local tracks
+    peerConnection.onconnectionstatechange = () => {
+      if (!peerConnection) return;
+      const state = peerConnection.connectionState;
+      console.log('[WebRTC] Connection state:', state);
+      if (state === 'failed') {
+        _stopStatsMonitor();
+        if (_iceRestartCount < MAX_ICE_RESTARTS && isCaller) {
+          _attemptIceRestart();
+        } else {
+          showToast('Connessione persa. Riprova.', 'error');
+          endCall(true);
+        }
+      }
+    };
+
+    // Add local tracks with initial bitrate constraints
     if (localStream) {
       localStream.getTracks().forEach(track => {
-        peerConnection.addTrack(track, localStream);
+        const sender = peerConnection.addTrack(track, localStream);
+        if (track.kind === 'video') {
+          _applyVideoBitrate(sender, _currentVideoBitrate);
+        }
       });
     }
+
+    // Start ICE connection timeout
+    _startIceTimeout();
 
     return peerConnection;
   }
@@ -828,7 +1145,14 @@
   }
 
   function cleanupCall() {
+    _stopStatsMonitor();
+    _clearIceTimeout();
+    if (_iceRestartTimer) { clearTimeout(_iceRestartTimer); _iceRestartTimer = null; }
     if (peerConnection) {
+      peerConnection.oniceconnectionstatechange = null;
+      peerConnection.onconnectionstatechange = null;
+      peerConnection.ontrack = null;
+      peerConnection.onicecandidate = null;
       peerConnection.close();
       peerConnection = null;
     }
@@ -843,6 +1167,10 @@
     audioEnabled = true;
     videoEnabled = true;
     currentCallMode = 'video';
+    _iceRestartCount = 0;
+    _currentVideoBitrate = VIDEO_BITRATE_HIGH;
+    _consecutivePoorStats = 0;
+    _consecutiveGoodStats = 0;
   }
 
   function endCall(notify = true) {
@@ -936,8 +1264,25 @@
     cleanupCall();
   }
 
-  // Callee: received SDP offer → create answer
+  // Callee: received SDP offer → create answer (also handles ICE restart re-offers)
   async function handleCallOffer(msg) {
+    // ICE restart: if already in call as callee, re-negotiate
+    if (peerConnection && isInCall && !isCaller) {
+      try {
+        const offer = JSON.parse(msg.sdp);
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'call_answer', sdp: JSON.stringify(answer) }));
+        }
+        videocallStatus.textContent = 'Riconnessione...';
+      } catch (err) {
+        console.error('[WebRTC] ICE restart answer failed:', err);
+      }
+      return;
+    }
+
     if (isCaller) return;
 
     createPeerConnection();
@@ -1087,6 +1432,7 @@
 
   // Photo send
   const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB raw file
+  let _pendingImageId = 0;
   if (photoBtn && photoInput) {
     photoBtn.addEventListener('click', () => photoInput.click());
     photoInput.addEventListener('change', async () => {
@@ -1101,22 +1447,67 @@
         showToast('Immagine troppo grande (max 10 MB).', 'warning');
         return;
       }
+
+      // Show optimistic preview with spinner immediately
+      const localPreviewUrl = URL.createObjectURL(file);
+      const placeholderId = 'img-pending-' + (++_pendingImageId);
+      _appendImagePlaceholder(placeholderId, localPreviewUrl);
+
       // Read as base64
       const reader = new FileReader();
       reader.onload = () => {
-        // result is "data:image/jpeg;base64,AAAA..."
         const base64 = reader.result.split(',')[1];
-        if (!base64) return;
+        if (!base64) {
+          _removeImagePlaceholder(placeholderId);
+          URL.revokeObjectURL(localPreviewUrl);
+          return;
+        }
         if (ws && ws.readyState === WebSocket.OPEN) {
+          // Tag so we can match broadcast back to placeholder
+          _currentImagePlaceholder = placeholderId;
+          _currentImagePreviewUrl = localPreviewUrl;
           ws.send(JSON.stringify({
             type: 'image',
             image_data: base64,
             image_mime: file.type,
           }));
+        } else {
+          _removeImagePlaceholder(placeholderId);
+          URL.revokeObjectURL(localPreviewUrl);
+          showToast('Connessione assente. Riprova.', 'error');
         }
+      };
+      reader.onerror = () => {
+        _removeImagePlaceholder(placeholderId);
+        URL.revokeObjectURL(localPreviewUrl);
+        showToast('Errore nella lettura del file.', 'error');
       };
       reader.readAsDataURL(file);
     });
+  }
+
+  let _currentImagePlaceholder = null;
+  let _currentImagePreviewUrl = null;
+
+  function _appendImagePlaceholder(id, previewUrl) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'dc-msg dc-msg-mine';
+    wrapper.id = id;
+    wrapper.innerHTML = `
+      <div class="dc-msg-bubble dc-msg-image-bubble dc-img-loading">
+        <div class="dc-img-preview-wrap">
+          <img src="${previewUrl}" class="dc-msg-image dc-img-uploading" alt="Invio foto..." />
+          <div class="dc-img-spinner"><div class="dc-spinner"></div></div>
+        </div>
+        <span class="dc-msg-time">Invio...</span>
+      </div>`;
+    messagesDiv.appendChild(wrapper);
+    scrollToBottom();
+  }
+
+  function _removeImagePlaceholder(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
   }
 
   // Notification toggle
