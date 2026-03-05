@@ -1431,7 +1431,7 @@
   }
 
   // Photo send
-  const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB raw file
+  const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // V5: 5 MB raw file
   let _pendingImageId = 0;
   if (photoBtn && photoInput) {
     photoBtn.addEventListener('click', () => photoInput.click());
@@ -1444,7 +1444,7 @@
         return;
       }
       if (file.size > MAX_IMAGE_SIZE) {
-        showToast('Immagine troppo grande (max 10 MB).', 'warning');
+        showToast('Immagine troppo grande (max 5 MB).', 'warning');
         return;
       }
 

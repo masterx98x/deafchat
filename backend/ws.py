@@ -8,6 +8,7 @@ import time
 import uuid
 from collections import defaultdict
 from datetime import datetime, timezone
+import base64
 
 from fastapi import WebSocket, WebSocketDisconnect
 
@@ -46,6 +47,25 @@ MAX_ICE_SIZE = 2_048    # 2 KB
 
 # --- H5: join timeout ---
 JOIN_TIMEOUT = 10.0  # seconds
+
+# --- V4: base64 validation pattern ---
+_BASE64_RE = re.compile(r"^[A-Za-z0-9+/=]+$")
+
+def _is_valid_base64(data: str) -> bool:
+    """Check that a string is valid base64."""
+    if not _BASE64_RE.match(data):
+        return False
+    try:
+        base64.b64decode(data, validate=True)
+        return True
+    except Exception:
+        return False
+
+# --- V8: reserved nicknames ---
+_RESERVED_NICKNAMES = {
+    "sistema", "system", "admin", "deafchat", "server",
+    "moderatore", "moderator", "bot", "info",
+}
 
 
 class _TokenBucket:
@@ -116,31 +136,37 @@ async def handle_websocket(ws: WebSocket, room_id: str) -> None:
         await ws.close(code=4004, reason="Room not found")
         return
 
-    # L4: WebSocket Origin check
+    # L4: WebSocket Origin check (V2: stricter – reject missing origin when origins configured)
     origin = None
     for header_name, header_value in ws.scope.get("headers", []):
         if header_name == b"origin":
             origin = header_value.decode("utf-8", errors="ignore")
             break
     allowed_origins = settings.cors_origin_list
-    if origin and allowed_origins:
-        if origin not in allowed_origins:
+    if allowed_origins:
+        if not origin or origin not in allowed_origins:
             await ws.close(code=4006, reason="Origin not allowed")
             return
 
+    # V12: reject connections without identifiable client IP
+    if not ws.client or not ws.client.host:
+        await ws.close(code=4008, reason="Unknown client")
+        return
+
     # S6: per-IP connection cap
-    client_ip = ws.client.host if ws.client else "unknown"
+    client_ip = ws.client.host
     if _ip_connections[client_ip] >= MAX_WS_PER_IP:
         await ws.close(code=4005, reason="Too many connections")
         return
 
     await ws.accept()
-    _ip_connections[client_ip] += 1
     ws_id = str(uuid.uuid4())
     nickname: str | None = None
     bucket = _TokenBucket(WS_MSG_RATE, WS_MSG_BURST)
     audio_bucket = _TokenBucket(WS_AUDIO_RATE, WS_AUDIO_BURST)
 
+    # V9: increment IP counter inside try so finally always decrements correctly
+    _ip_connections[client_ip] += 1
     try:
         # H5: Wait for the join message with timeout
         try:
@@ -163,15 +189,25 @@ async def handle_websocket(ws: WebSocket, room_id: str) -> None:
 
         nickname = incoming.nickname.strip()[:30]
 
-        # Check for duplicate nickname
-        existing = room_manager.get_nicknames(room_id)
-        if nickname.lower() in [n.lower() for n in existing]:
-            await _send(ws, WSOutgoing(type=WSMessageType.error, content="Nickname già in uso in questa stanza"))
+        # V8: block reserved nicknames
+        if nickname.lower() in _RESERVED_NICKNAMES:
+            await _send(ws, WSOutgoing(type=WSMessageType.error, content="Questo nickname è riservato. Scegline un altro."))
             await ws.close(code=4002)
             return
 
-        # Add to room
-        if not room_manager.add_member(room_id, ws_id, nickname, ws):
+        # V8: block nicknames with only invisible/control characters
+        if not re.sub(r'[\s\u200b-\u200f\u2028-\u202f\u2060\ufeff]', '', nickname):
+            await _send(ws, WSOutgoing(type=WSMessageType.error, content="Nickname non valido."))
+            await ws.close(code=4002)
+            return
+
+        # V7: add_member now checks for duplicates atomically
+        result = room_manager.add_member(room_id, ws_id, nickname, ws)
+        if result == "duplicate":
+            await _send(ws, WSOutgoing(type=WSMessageType.error, content="Nickname già in uso in questa stanza"))
+            await ws.close(code=4002)
+            return
+        if not result:
             await _send(ws, WSOutgoing(type=WSMessageType.error, content="Stanza piena"))
             await ws.close(code=4003)
             return
@@ -271,11 +307,19 @@ async def handle_websocket(ws: WebSocket, room_id: str) -> None:
                         timestamp=_now_iso(),
                     ))
                     continue
-                # H2: validate audio MIME type
-                if incoming.audio_mime and incoming.audio_mime not in ALLOWED_AUDIO_MIMES:
+                # V3: audio MIME must not be empty
+                if not incoming.audio_mime or incoming.audio_mime not in ALLOWED_AUDIO_MIMES:
                     await _send(ws, WSOutgoing(
                         type=WSMessageType.error,
                         content="Formato audio non supportato.",
+                        timestamp=_now_iso(),
+                    ))
+                    continue
+                # V4: validate base64 audio data
+                if not _is_valid_base64(audio_data):
+                    await _send(ws, WSOutgoing(
+                        type=WSMessageType.error,
+                        content="Dati audio non validi.",
                         timestamp=_now_iso(),
                     ))
                     continue
@@ -308,11 +352,19 @@ async def handle_websocket(ws: WebSocket, room_id: str) -> None:
                 image_data = incoming.image_data
                 if not image_data:
                     continue
+                # V4: validate base64 image data
+                if not _is_valid_base64(image_data):
+                    await _send(ws, WSOutgoing(
+                        type=WSMessageType.error,
+                        content="Dati immagine non validi.",
+                        timestamp=_now_iso(),
+                    ))
+                    continue
                 # Validate size
                 if len(image_data) > settings.max_image_size:
                     await _send(ws, WSOutgoing(
                         type=WSMessageType.error,
-                        content="Immagine troppo grande (max 10 MB).",
+                        content="Immagine troppo grande (max 5 MB).",
                         timestamp=_now_iso(),
                     ))
                     continue

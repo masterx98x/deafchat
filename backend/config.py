@@ -37,9 +37,9 @@ class Settings:
         default_factory=lambda: int(os.getenv("MAX_AUDIO_SIZE", "1500000"))
     )
 
-    # Images
+    # Images – V5: reduced default from 14MB to 7MB (~5 MB file → ~6.7 MB base64)
     max_image_size: int = field(
-        default_factory=lambda: int(os.getenv("MAX_IMAGE_SIZE", "14000000"))  # ~10 MB file -> ~13.3 MB base64
+        default_factory=lambda: int(os.getenv("MAX_IMAGE_SIZE", "7000000"))
     )
 
     # Security

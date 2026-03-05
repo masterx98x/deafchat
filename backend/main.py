@@ -85,6 +85,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # S7: CSP – skip override for XML/txt files (sitemap, robots)
         req_path = request.url.path
         if req_path not in ("/sitemap.xml", "/robots.txt"):
+            # V1: restrict connect-src to wss: only in production
+            ws_scheme = "ws: wss:" if settings.is_dev else "wss:"
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; "
                 "script-src 'self'; "
@@ -92,7 +94,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                 "font-src 'self' https://fonts.gstatic.com; "
                 "img-src 'self' data: blob:; "
                 "media-src 'self' blob:; "
-                "connect-src 'self' ws: wss:; "
+                f"connect-src 'self' {ws_scheme}; "
                 "worker-src 'self'; "
                 "frame-ancestors 'none'"
             )
@@ -161,7 +163,8 @@ async def get_room_info(room_id: str, request: Request):
 
 @app.get("/health")
 async def health_check():
-    return {"status": "ok", "active_rooms": room_manager.active_room_count}
+    # V6: do not expose internal stats publicly
+    return {"status": "ok"}
 
 
 # ---------- WebSocket ----------

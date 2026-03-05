@@ -7,6 +7,7 @@ An asyncio background task prunes expired rooms.
 from __future__ import annotations
 
 import asyncio
+import re
 import secrets
 import string
 from dataclasses import dataclass, field
@@ -120,6 +121,11 @@ class RoomManager:
 
         if not room_name:
             room_name = f"Chat {room_id[:6]}"
+        # V11: sanitize room_name – strip control characters and HTML tags
+        room_name = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', room_name)
+        room_name = re.sub(r'<[^>]*>', '', room_name).strip()
+        if not room_name:
+            room_name = f"Chat {room_id[:6]}"
 
         room = Room(
             room_id=room_id,
@@ -138,7 +144,8 @@ class RoomManager:
 
     # --- membership ---------------------------------------------------------
 
-    def add_member(self, room_id: str, ws_id: str, nickname: str, ws: WebSocket) -> bool:
+    def add_member(self, room_id: str, ws_id: str, nickname: str, ws: WebSocket) -> bool | str:
+        """Add member. Returns True on success, False if full/missing, 'duplicate' if nickname taken."""
         room = self._rooms.get(room_id)
         if room is None:
             return False
@@ -147,6 +154,9 @@ class RoomManager:
             return False
         if room.member_count >= settings.max_room_members:
             return False
+        # V7: atomic duplicate nickname check
+        if nickname.lower() in [m.nickname.lower() for m in room.members.values()]:
+            return "duplicate"
         room.members[ws_id] = Member(nickname=nickname, ws=ws)
         room.touch()
         return True
