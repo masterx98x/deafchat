@@ -74,6 +74,7 @@ class WSIncoming(BaseModel):
     sdp: str = ""
     ice: str = ""  # JSON-encoded ICE candidate
     call_mode: str = "video"  # "video" or "voice"
+    relay_only: bool = False  # signal callee to use relay-only transport
     # Image fields
     image_data: str = ""  # base64-encoded image
     image_mime: str = ""  # e.g. image/jpeg
@@ -93,6 +94,7 @@ class WSOutgoing(BaseModel):
     sdp: str = ""
     ice: str = ""
     call_mode: str = "video"  # "video" or "voice"
+    relay_only: bool = False  # signal callee to use relay-only transport
     # Image fields
     image_data: str = ""
     image_mime: str = ""

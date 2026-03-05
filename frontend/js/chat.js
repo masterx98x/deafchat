@@ -81,9 +81,7 @@
   let currentCallMode = 'video'; // 'video' or 'voice'
 
   // ICE servers – loaded dynamically from /api/ice-config (includes TURN)
-  let ICE_SERVERS = [
-    { urls: 'stun:stun.l.google.com:19302' },
-  ];
+  let ICE_SERVERS = [];
 
   // When true, force relay-only ICE (used as fallback after first connection failure)
   let _forceRelay = false;
@@ -102,7 +100,7 @@
 
   // --- Adaptive bitrate (ABR) constants ---
   const ABR_CHECK_INTERVAL = 3000;        // poll stats every 3 s
-  const ICE_CONNECTION_TIMEOUT = 20000;   // 20 s to establish connection
+  const ICE_CONNECTION_TIMEOUT = 10000;   // 10 s to establish connection
   const ICE_RESTART_DELAY = 3000;         // wait before ICE restart attempt
   const MAX_ICE_RESTARTS = 3;
   const VIDEO_BITRATE_HIGH = 1500000;     // 1.5 Mbps
@@ -1047,8 +1045,8 @@
     if (!peerConnection || !isCaller) return;
     _iceRestartCount++;
 
-    // After first failed attempt → switch to relay-only mode
-    if (_iceRestartCount >= 2 && !_forceRelay) {
+    // On first failed attempt → switch to relay-only mode immediately
+    if (_iceRestartCount >= 1 && !_forceRelay) {
       console.log('[WebRTC] Switching to RELAY-ONLY mode for reconnection attempt', _iceRestartCount);
       _forceRelay = true;
       await _relayOnlyReconnect();
@@ -1060,7 +1058,7 @@
       const offer = await peerConnection.createOffer({ iceRestart: true });
       await peerConnection.setLocalDescription(offer);
       if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: 'call_offer', sdp: JSON.stringify(offer) }));
+        ws.send(JSON.stringify({ type: 'call_offer', sdp: JSON.stringify(offer), relay_only: _forceRelay }));
       }
       _startIceTimeout();
     } catch (e) {
@@ -1102,7 +1100,7 @@
       const offer = await peerConnection.createOffer();
       await peerConnection.setLocalDescription(offer);
       if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: 'call_offer', sdp: JSON.stringify(offer) }));
+        ws.send(JSON.stringify({ type: 'call_offer', sdp: JSON.stringify(offer), relay_only: true }));
       }
     } catch (err) {
       console.error('[WebRTC] Relay-only reconnect failed:', err);
@@ -1354,6 +1352,7 @@
         ws.send(JSON.stringify({
           type: 'call_offer',
           sdp: JSON.stringify(offer),
+          relay_only: _forceRelay,
         }));
       }
     } catch (err) {
@@ -1370,6 +1369,37 @@
 
   // Callee: received SDP offer → create answer (also handles ICE restart re-offers)
   async function handleCallOffer(msg) {
+    // Relay-only reconnect: caller sent relay_only flag → callee must also
+    // destroy old PC and recreate with relay-only policy
+    if (msg.relay_only && peerConnection && isInCall && !isCaller) {
+      console.log('[WebRTC] Callee: received relay-only re-offer, recreating PC in relay mode');
+      _forceRelay = true;
+      _stopStatsMonitor();
+      _clearIceTimeout();
+      if (peerConnection) {
+        peerConnection.oniceconnectionstatechange = null;
+        peerConnection.onconnectionstatechange = null;
+        peerConnection.ontrack = null;
+        peerConnection.onicecandidate = null;
+        peerConnection.close();
+        peerConnection = null;
+      }
+      createPeerConnection();
+      try {
+        var offer = JSON.parse(msg.sdp);
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+        var answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'call_answer', sdp: JSON.stringify(answer) }));
+        }
+        videocallStatus.textContent = 'Riconnessione via relay...';
+      } catch (err) {
+        console.error('[WebRTC] Relay-only callee answer failed:', err);
+      }
+      return;
+    }
+
     // ICE restart: if already in call as callee, re-negotiate
     if (peerConnection && isInCall && !isCaller) {
       try {

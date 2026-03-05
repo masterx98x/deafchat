@@ -447,6 +447,7 @@ async def handle_websocket(ws: WebSocket, room_id: str) -> None:
                     sdp=incoming.sdp,
                     ice=incoming.ice,
                     call_mode=incoming.call_mode,
+                    relay_only=incoming.relay_only,
                     timestamp=_now_iso(),
                 )
                 await _broadcast(room_id, out, exclude_ws=ws)

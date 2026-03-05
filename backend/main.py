@@ -164,20 +164,22 @@ async def get_room_info(room_id: str, request: Request):
 @limiter.limit(settings.rate_limit_api)
 async def ice_config(request: Request):
     """Return ICE servers list for WebRTC peer connections."""
-    servers = [
-        {"urls": "stun:stun.l.google.com:19302"},
-    ]
+    servers = []
     turn_host = settings.turn_host
     if turn_host:
         user = settings.turn_username
         pwd = settings.turn_password
         port = settings.turn_port
-        # UDP (standard) + TCP fallback on the same port.
-        # turns: entries are omitted until a TLS certificate is configured in coturn.
+        # coturn serves both STUN and TURN on the same port – no need
+        # for external STUN servers (Google STUN caused gathering hangs).
         servers.extend([
+            {"urls": f"stun:{turn_host}:{port}"},
             {"urls": f"turn:{turn_host}:{port}",                  "username": user, "credential": pwd},
             {"urls": f"turn:{turn_host}:{port}?transport=tcp",    "username": user, "credential": pwd},
         ])
+    else:
+        # Fallback: no TURN configured, use public STUN only
+        servers.append({"urls": "stun:stun.l.google.com:19302"})
     return {"iceServers": servers}
 
 
