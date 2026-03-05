@@ -80,16 +80,23 @@
   let videoEnabled = true;
   let currentCallMode = 'video'; // 'video' or 'voice'
 
-  const ICE_SERVERS = [
+  // ICE servers – loaded dynamically from /api/ice-config (includes TURN)
+  let ICE_SERVERS = [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun.cloudflare.com:3478' },
-    // TURN relay – needed when both peers are behind NAT (Docker, 4G, corporate)
-    { urls: 'turn:a.relay.metered.ca:80',      username: 'e43844a431499a65afaf498c', credential: '2fPbOOgaH7LB2MBg' },
-    { urls: 'turn:a.relay.metered.ca:80?transport=tcp',  username: 'e43844a431499a65afaf498c', credential: '2fPbOOgaH7LB2MBg' },
-    { urls: 'turn:a.relay.metered.ca:443',     username: 'e43844a431499a65afaf498c', credential: '2fPbOOgaH7LB2MBg' },
-    { urls: 'turns:a.relay.metered.ca:443',    username: 'e43844a431499a65afaf498c', credential: '2fPbOOgaH7LB2MBg' },
   ];
+
+  async function loadIceConfig() {
+    try {
+      const res = await fetch('/api/ice-config');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.iceServers && data.iceServers.length) {
+          ICE_SERVERS = data.iceServers;
+        }
+      }
+    } catch { /* fallback to default STUN */ }
+  }
 
   // --- Adaptive bitrate (ABR) constants ---
   const ABR_CHECK_INTERVAL = 3000;        // poll stats every 3 s
@@ -1599,4 +1606,5 @@
   }, 25000);
 
   loadRoomInfo();
+  loadIceConfig();
 })();

@@ -93,8 +93,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                 "font-src 'self' https://fonts.gstatic.com; "
                 "img-src 'self' data: blob:; "
                 "media-src 'self' blob:; "
-                f"connect-src 'self' {ws_scheme} "
-                "stun: turn: turns: https://a.relay.metered.ca; "
+                f"connect-src 'self' {ws_scheme}; "
                 "worker-src 'self'; "
                 "frame-ancestors 'none'"
             )
@@ -157,6 +156,31 @@ async def get_room_info(room_id: str, request: Request):
         expires_at=room.expires_at,
         created_at=room.created_at,
     )
+
+
+# ---------- ICE/TURN configuration (served to clients for WebRTC) ----------
+
+@app.get("/api/ice-config")
+@limiter.limit(settings.rate_limit_api)
+async def ice_config(request: Request):
+    """Return ICE servers list for WebRTC peer connections."""
+    servers = [
+        {"urls": "stun:stun.l.google.com:19302"},
+        {"urls": "stun:stun1.l.google.com:19302"},
+    ]
+    turn_host = settings.turn_host
+    if turn_host:
+        user = settings.turn_username
+        pwd = settings.turn_password
+        port = settings.turn_port
+        tls_port = settings.turn_tls_port
+        servers.extend([
+            {"urls": f"turn:{turn_host}:{port}",                  "username": user, "credential": pwd},
+            {"urls": f"turn:{turn_host}:{port}?transport=tcp",    "username": user, "credential": pwd},
+            {"urls": f"turn:{turn_host}:{tls_port}",              "username": user, "credential": pwd},
+            {"urls": f"turns:{turn_host}:{tls_port}",             "username": user, "credential": pwd},
+        ])
+    return {"iceServers": servers}
 
 
 # ---------- Health (S4: used by Docker HEALTHCHECK) ----------

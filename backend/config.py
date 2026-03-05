@@ -54,6 +54,23 @@ class Settings:
         default_factory=lambda: os.getenv("RATE_LIMIT_API", "30/minute")
     )
 
+    # TURN server (coturn)
+    turn_host: str = field(
+        default_factory=lambda: os.getenv("TURN_HOST", "")
+    )
+    turn_port: int = field(
+        default_factory=lambda: int(os.getenv("TURN_PORT", "3478"))
+    )
+    turn_tls_port: int = field(
+        default_factory=lambda: int(os.getenv("TURN_TLS_PORT", "5349"))
+    )
+    turn_username: str = field(
+        default_factory=lambda: os.getenv("TURN_USERNAME", "deafchat")
+    )
+    turn_password: str = field(
+        default_factory=lambda: os.getenv("TURN_PASSWORD", "deafchat-turn-secret")
+    )
+
     @property
     def is_dev(self) -> bool:
         return self.env.lower() in ("dev", "development")
