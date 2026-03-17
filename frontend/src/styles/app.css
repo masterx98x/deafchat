@@ -55,6 +55,80 @@
   background: radial-gradient(circle, rgba(255, 255, 255, 0.035), transparent 72%);
 }
 
+.dc-background__particles {
+  position: absolute;
+  inset: 0;
+}
+
+.dc-background__particle {
+  position: absolute;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 167, 180, 0.95), rgba(255, 59, 92, 0.72) 34%, rgba(255, 59, 92, 0.12) 68%, transparent 78%);
+  box-shadow:
+    0 0 12px rgba(255, 59, 92, 0.16),
+    0 0 30px rgba(255, 59, 92, 0.08);
+  opacity: 0.5;
+  filter: blur(0.2px);
+  will-change: transform;
+}
+
+.dc-background__particle--1 {
+  top: 12%;
+  left: 10%;
+  width: 18px;
+  height: 18px;
+  animation: dc-orb-float-a 16s ease-in-out infinite;
+}
+
+.dc-background__particle--2 {
+  top: 24%;
+  right: 16%;
+  width: 12px;
+  height: 12px;
+  animation: dc-orb-float-b 19s ease-in-out infinite;
+}
+
+.dc-background__particle--3 {
+  top: 38%;
+  left: 72%;
+  width: 24px;
+  height: 24px;
+  animation: dc-orb-float-c 21s ease-in-out infinite;
+}
+
+.dc-background__particle--4 {
+  bottom: 18%;
+  left: 16%;
+  width: 14px;
+  height: 14px;
+  animation: dc-orb-float-b 18s ease-in-out infinite reverse;
+}
+
+.dc-background__particle--5 {
+  bottom: 12%;
+  right: 10%;
+  width: 22px;
+  height: 22px;
+  animation: dc-orb-float-a 20s ease-in-out infinite reverse;
+}
+
+.dc-background__particle--6 {
+  top: 58%;
+  left: 48%;
+  width: 10px;
+  height: 10px;
+  animation: dc-orb-float-c 15s ease-in-out infinite;
+}
+
+.dc-background__particle--7 {
+  top: 16%;
+  left: 48%;
+  width: 16px;
+  height: 16px;
+  animation: dc-orb-float-b 17s ease-in-out infinite;
+}
+
 .dc-background__grid,
 .dc-background__noise {
   position: absolute;
@@ -1488,6 +1562,48 @@
 
   100% {
     box-shadow: 0 0 0 0 rgba(255, 59, 92, 0);
+  }
+}
+
+@keyframes dc-orb-float-a {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(26px, -18px, 0);
+  }
+
+  100% {
+    transform: translate3d(-10px, 22px, 0);
+  }
+}
+
+@keyframes dc-orb-float-b {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(-22px, 16px, 0);
+  }
+
+  100% {
+    transform: translate3d(14px, -20px, 0);
+  }
+}
+
+@keyframes dc-orb-float-c {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(18px, 24px, 0);
+  }
+
+  100% {
+    transform: translate3d(-28px, -14px, 0);
   }
 }
 
