@@ -1,4 +1,4 @@
-export default function AppShell({ children, transitionOverlay = null }) {
+export default function AppShell({ children, transitionOverlay = null, isArriving = false }) {
   return (
     <div className="dc-app-shell">
       <div className="dc-background" aria-hidden="true">
@@ -16,7 +16,7 @@ export default function AppShell({ children, transitionOverlay = null }) {
         <div className="dc-background__grid" />
         <div className="dc-background__noise" />
       </div>
-      <div className="dc-app-chrome">{children}</div>
+      <div className={`dc-app-chrome${isArriving ? ' dc-app-chrome--arriving' : ''}`}>{children}</div>
       {transitionOverlay}
     </div>
   );

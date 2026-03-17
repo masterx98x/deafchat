@@ -25,6 +25,16 @@
   position: relative;
   z-index: 1;
   min-height: 100vh;
+  transition:
+    opacity 0.72s ease,
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.8s ease;
+}
+
+.dc-app-chrome--arriving {
+  opacity: 0.76;
+  filter: blur(7px);
+  transform: scale(1.014);
 }
 
 .dc-background {
@@ -155,6 +165,165 @@
   background-size: 18px 18px;
   opacity: 0.028;
   mix-blend-mode: screen;
+}
+
+.dc-entry-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  overflow: hidden;
+  pointer-events: none;
+  background: #08090d;
+  isolation: isolate;
+  animation: dc-entry-overlay-out 0.76s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.dc-entry-overlay__bg,
+.dc-entry-overlay__grid,
+.dc-entry-overlay__noise,
+.dc-entry-overlay__orb,
+.dc-entry-overlay__beam,
+.dc-entry-overlay__sweep {
+  position: absolute;
+  inset: 0;
+}
+
+.dc-entry-overlay__bg {
+  z-index: 0;
+  background:
+    radial-gradient(circle at 16% 28%, rgba(255, 59, 92, 0.16), transparent 30%),
+    radial-gradient(circle at 82% 22%, rgba(255, 94, 118, 0.12), transparent 24%),
+    linear-gradient(126deg, #0a0a0f 0%, #120b11 46%, #0d0d13 100%);
+}
+
+.dc-entry-overlay__grid {
+  z-index: 1;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+  background-size: 38px 38px;
+  mask-image: radial-gradient(circle at center, #000 36%, transparent 88%);
+  opacity: 0.16;
+}
+
+.dc-entry-overlay__noise {
+  z-index: 1;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 0.75px, transparent 0.75px);
+  background-size: 18px 18px;
+  opacity: 0.03;
+  mix-blend-mode: screen;
+}
+
+.dc-entry-overlay__orb {
+  z-index: 2;
+  border-radius: 999px;
+  filter: blur(34px);
+  mix-blend-mode: screen;
+}
+
+.dc-entry-overlay__orb--a {
+  top: -20%;
+  left: -14%;
+  width: 44rem;
+  height: 44rem;
+  background: radial-gradient(circle, rgba(255, 118, 138, 0.24), rgba(255, 59, 92, 0.08) 42%, transparent 76%);
+  animation: dc-entry-orb-a 0.76s ease forwards;
+}
+
+.dc-entry-overlay__orb--b {
+  top: 2%;
+  right: -10%;
+  width: 34rem;
+  height: 34rem;
+  background: radial-gradient(circle, rgba(255, 132, 151, 0.18), rgba(255, 59, 92, 0.06) 40%, transparent 74%);
+  animation: dc-entry-orb-b 0.76s ease forwards;
+}
+
+.dc-entry-overlay__orb--c {
+  bottom: -34%;
+  left: 28%;
+  width: 38rem;
+  height: 38rem;
+  background: radial-gradient(circle, rgba(255, 149, 166, 0.14), rgba(255, 59, 92, 0.04) 44%, transparent 78%);
+  animation: dc-entry-orb-c 0.76s ease forwards;
+}
+
+.dc-entry-overlay__beam {
+  z-index: 3;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 192, 201, 0.95), transparent);
+  box-shadow: 0 0 20px rgba(255, 59, 92, 0.22);
+}
+
+.dc-entry-overlay__beam--a {
+  inset: 24% -14% auto auto;
+  width: 42%;
+  animation: dc-entry-beam-a 0.76s ease forwards;
+}
+
+.dc-entry-overlay__beam--b {
+  inset: auto auto 28% -10%;
+  width: 46%;
+  animation: dc-entry-beam-b 0.76s ease forwards;
+}
+
+.dc-entry-overlay__sweep {
+  z-index: 4;
+  background: linear-gradient(104deg, transparent 0%, rgba(255, 168, 183, 0.12) 45%, transparent 70%);
+  transform: translateX(-124%) skewX(-18deg);
+  animation: dc-entry-sweep 0.72s ease forwards;
+}
+
+.dc-entry-overlay__center {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.dc-entry-overlay__card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.15rem;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 110, 133, 0.22);
+  background: rgba(18, 12, 17, 0.56);
+  color: #fff4f7;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: dc-entry-rise 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.dc-entry-overlay__card img {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.dc-entry-overlay__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.dc-entry-overlay__copy span {
+  color: rgba(255, 203, 214, 0.76);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.dc-entry-overlay__copy strong {
+  color: #ffffff;
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 .dc-suite-transition {
@@ -1850,6 +2019,104 @@
   }
 }
 
+@keyframes dc-entry-overlay-out {
+  0% {
+    opacity: 1;
+  }
+
+  72% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes dc-entry-sweep {
+  from {
+    transform: translateX(-124%) skewX(-18deg);
+    opacity: 0.12;
+  }
+
+  to {
+    transform: translateX(132%) skewX(-18deg);
+    opacity: 0.76;
+  }
+}
+
+@keyframes dc-entry-orb-a {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.92);
+    opacity: 0.18;
+  }
+
+  100% {
+    transform: translate3d(4vw, -4vh, 0) scale(1.04);
+    opacity: 0.62;
+  }
+}
+
+@keyframes dc-entry-orb-b {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.88);
+    opacity: 0.12;
+  }
+
+  100% {
+    transform: translate3d(-4vw, 3vh, 0) scale(1.04);
+    opacity: 0.44;
+  }
+}
+
+@keyframes dc-entry-orb-c {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.9);
+    opacity: 0.08;
+  }
+
+  100% {
+    transform: translate3d(1vw, -2vh, 0) scale(1.06);
+    opacity: 0.3;
+  }
+}
+
+@keyframes dc-entry-beam-a {
+  from {
+    transform: translateX(18%) scaleX(0.7);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(-10%) scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes dc-entry-beam-b {
+  from {
+    transform: translateX(-18%) scaleX(0.7);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(14%) scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes dc-entry-rise {
+  from {
+    transform: translateY(16px) scale(0.98);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
 @keyframes dc-suite-transition-in {
   from {
     opacity: 0;
@@ -2053,6 +2320,10 @@
   .dc-suite-transition__brand-card {
     min-width: min(100%, 280px);
   }
+
+  .dc-entry-overlay__card {
+    min-width: min(100%, 320px);
+  }
 }
 
 @media (max-width: 640px) {
@@ -2095,6 +2366,21 @@
   .dc-suite-transition__orb--c {
     width: 24rem;
     height: 24rem;
+  }
+
+  .dc-entry-overlay__orb--a {
+    width: 30rem;
+    height: 30rem;
+  }
+
+  .dc-entry-overlay__orb--b {
+    width: 24rem;
+    height: 24rem;
+  }
+
+  .dc-entry-overlay__orb--c {
+    width: 26rem;
+    height: 26rem;
   }
 
   .dc-shell {

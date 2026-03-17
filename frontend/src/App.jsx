@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import AppFooter from './components/AppFooter';
+import DeafChatArrivalOverlay from './components/DeafChatArrivalOverlay';
 import AppShell from './components/AppShell';
 import BrandHeader from './components/BrandHeader';
 import DeafSuiteTransitionOverlay from './components/DeafSuiteTransitionOverlay';
@@ -49,10 +50,27 @@ function warmDeafSuiteResources() {
   }
 }
 
+function consumeInboundSource(expectedSource) {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  const url = new URL(window.location.href);
+  if (url.searchParams.get('from') !== expectedSource) {
+    return false;
+  }
+
+  url.searchParams.delete('from');
+  const nextUrl = `${url.pathname}${url.search}${url.hash}`;
+  window.history.replaceState(window.history.state, '', nextUrl);
+  return true;
+}
+
 function AppFrame() {
   const location = useLocation();
   const isChatRoute = location.pathname.startsWith('/chat/');
   const [isLeavingToDeafSuite, setIsLeavingToDeafSuite] = useState(false);
+  const [isArrivingFromDeafSuite, setIsArrivingFromDeafSuite] = useState(false);
   const warmedRef = useRef(false);
 
   const ensureDeafSuiteWarm = () => {
@@ -65,6 +83,19 @@ function AppFrame() {
     ensureDeafSuiteWarm();
   }, []);
 
+  useEffect(() => {
+    if (!consumeInboundSource('deafsuite')) {
+      return undefined;
+    }
+
+    setIsArrivingFromDeafSuite(true);
+    const timer = window.setTimeout(() => {
+      setIsArrivingFromDeafSuite(false);
+    }, 760);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+
   const handleDeafSuiteNavigate = (event) => {
     event?.preventDefault();
     if (isLeavingToDeafSuite) return;
@@ -75,8 +106,15 @@ function AppFrame() {
     }, 860);
   };
 
+  const shellOverlay = isLeavingToDeafSuite
+    ? <DeafSuiteTransitionOverlay />
+    : (isArrivingFromDeafSuite ? <DeafChatArrivalOverlay /> : null);
+
   return (
-    <AppShell transitionOverlay={isLeavingToDeafSuite ? <DeafSuiteTransitionOverlay /> : null}>
+    <AppShell
+      transitionOverlay={shellOverlay}
+      isArriving={isArrivingFromDeafSuite}
+    >
       {!isChatRoute ? (
         <BrandHeader
           deafSuiteHref={DEAFSUITE_ENTRY_URL}
