@@ -13,6 +13,7 @@
 .dc-app-shell {
   position: relative;
   min-height: 100vh;
+  font-family: var(--dc-font-body);
   background:
     radial-gradient(circle at 20% 30%, rgba(255, 59, 92, 0.085), transparent 48%),
     radial-gradient(circle at 78% 18%, rgba(255, 59, 92, 0.06), transparent 42%),
@@ -597,7 +598,7 @@
 .dc-site-header__inner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 20px;
   padding: 16px 24px;
 }
@@ -760,8 +761,8 @@
   font-family: var(--dc-font-display);
   font-size: clamp(2.9rem, 6vw, 5.1rem);
   font-weight: 700;
-  letter-spacing: -0.06em;
-  line-height: 0.96;
+  letter-spacing: -0.04em;
+  line-height: 1;
 }
 
 .dc-home-hero__description,
@@ -778,7 +779,10 @@
 .dc-home-hero__description {
   margin: 0;
   max-width: 62ch;
+  font-family: var(--dc-font-body);
   font-size: 1.04rem;
+  font-weight: 400;
+  letter-spacing: 0;
   line-height: 1.78;
 }
 
@@ -804,7 +808,7 @@
   color: var(--dc-text-primary);
   font-family: var(--dc-font-display);
   font-size: clamp(1.4rem, 2vw, 1.9rem);
-  letter-spacing: -0.04em;
+  letter-spacing: -0.025em;
 }
 
 .dc-metric-card span {
@@ -856,7 +860,7 @@
   margin: 0;
   font-family: var(--dc-font-display);
   font-size: clamp(1.5rem, 2.5vw, 2.1rem);
-  letter-spacing: -0.04em;
+  letter-spacing: -0.025em;
 }
 
 .dc-control-card__header p,
@@ -1142,7 +1146,7 @@
   margin: 0;
   font-family: var(--dc-font-display);
   font-size: clamp(1.8rem, 2.7vw, 2.6rem);
-  letter-spacing: -0.045em;
+  letter-spacing: -0.025em;
 }
 
 .dc-section-header p {
@@ -1205,7 +1209,155 @@
   margin: 0;
   font-family: var(--dc-font-display);
   font-size: 1.12rem;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.015em;
+}
+
+.dc-ecosystem-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.dc-ecosystem-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 100%;
+  padding: 24px;
+  overflow: hidden;
+}
+
+.dc-ecosystem-card::before,
+.dc-ecosystem-card::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.dc-ecosystem-card::before {
+  inset: 0;
+  opacity: 0.9;
+}
+
+.dc-ecosystem-card::after {
+  inset: auto -18% -44% auto;
+  width: 15rem;
+  height: 15rem;
+  border-radius: 999px;
+  filter: blur(42px);
+  opacity: 0.18;
+}
+
+.dc-ecosystem-card--suite::before {
+  background:
+    linear-gradient(135deg, rgba(18, 71, 44, 0.2), transparent 52%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 40%);
+}
+
+.dc-ecosystem-card--suite::after {
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.6), transparent 70%);
+}
+
+.dc-ecosystem-card--news::before {
+  background:
+    linear-gradient(135deg, rgba(29, 78, 216, 0.2), transparent 52%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 40%);
+}
+
+.dc-ecosystem-card--news::after {
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.58), transparent 70%);
+}
+
+.dc-ecosystem-card__badge {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-width: 54px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: var(--dc-radius-pill);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.dc-ecosystem-card--suite .dc-ecosystem-card__badge {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  color: #b7f7dd;
+}
+
+.dc-ecosystem-card--news .dc-ecosystem-card__badge {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(96, 165, 250, 0.22);
+  color: #bfdbfe;
+}
+
+.dc-ecosystem-card__kicker {
+  position: relative;
+  z-index: 1;
+  color: var(--dc-text-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.dc-ecosystem-card h3 {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  color: var(--dc-text-primary);
+  font-family: var(--dc-font-display);
+  font-size: clamp(1.25rem, 2vw, 1.6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.22;
+}
+
+.dc-ecosystem-card p {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  color: var(--dc-text-body);
+  font-family: var(--dc-font-body);
+  line-height: 1.72;
+}
+
+.dc-ecosystem-card__actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  margin-top: auto;
+}
+
+.dc-btn--suite {
+  border-color: rgba(52, 211, 153, 0.18);
+  background: rgba(16, 185, 129, 0.08);
+  color: #d1fae5;
+}
+
+.dc-btn--suite:hover {
+  border-color: rgba(52, 211, 153, 0.34);
+  background: rgba(16, 185, 129, 0.14);
+  color: #ffffff;
+}
+
+.dc-btn--news {
+  border-color: rgba(96, 165, 250, 0.2);
+  background: rgba(59, 130, 246, 0.08);
+  color: #dbeafe;
+}
+
+.dc-btn--news:hover {
+  border-color: rgba(96, 165, 250, 0.34);
+  background: rgba(59, 130, 246, 0.14);
+  color: #ffffff;
 }
 
 .dc-info-card p {
@@ -2250,6 +2402,10 @@
     grid-template-columns: 1fr;
   }
 
+  .dc-ecosystem-grid {
+    grid-template-columns: 1fr;
+  }
+
   .dc-card-grid--feature {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2288,6 +2444,10 @@
   .dc-site-footer__nav,
   .dc-chat-header__actions {
     justify-content: flex-start;
+  }
+
+  .dc-ecosystem-card {
+    padding: 20px;
   }
 
   .dc-metric-grid,

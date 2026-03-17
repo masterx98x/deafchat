@@ -1,4 +1,10 @@
-export default function AppFooter({ deafSuiteHref, onDeafSuiteNavigate, onDeafSuiteWarm }) {
+export default function AppFooter({
+  deafSuiteHref,
+  onDeafSuiteNavigate,
+  onDeafSuiteWarm,
+  deafNewsHref,
+  onDeafNewsWarm,
+}) {
   return (
     <footer className="dc-site-footer">
       <div className="dc-shell dc-site-footer__inner">
@@ -16,7 +22,12 @@ export default function AppFooter({ deafSuiteHref, onDeafSuiteNavigate, onDeafSu
           >
             DeafSuite
           </a>
-          <a href="https://deafnews.it/" target="_blank" rel="noreferrer noopener">
+          <a
+            href={deafNewsHref}
+            onMouseEnter={onDeafNewsWarm}
+            onFocus={onDeafNewsWarm}
+            onTouchStart={onDeafNewsWarm}
+          >
             DeafNews
           </a>
         </div>

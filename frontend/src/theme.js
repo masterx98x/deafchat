@@ -2,7 +2,7 @@ const themes = {
   dark: {
     '--dc-theme-name': 'dark',
     '--dc-font-body': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-    '--dc-font-display': '"Space Grotesk", "Segoe UI", sans-serif',
+    '--dc-font-display': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     '--dc-bg-base': '#0B0B0F',
     '--dc-bg-elevated': '#111118',
     '--dc-bg-elevated-strong': '#14141C',
@@ -34,7 +34,7 @@ const themes = {
   light: {
     '--dc-theme-name': 'light',
     '--dc-font-body': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-    '--dc-font-display': '"Space Grotesk", "Segoe UI", sans-serif',
+    '--dc-font-display': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     '--dc-bg-base': '#F5F5F7',
     '--dc-bg-elevated': '#FFFFFF',
     '--dc-bg-elevated-strong': '#FFFFFF',

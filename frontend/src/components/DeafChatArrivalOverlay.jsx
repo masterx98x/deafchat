@@ -1,4 +1,4 @@
-export default function DeafChatArrivalOverlay() {
+export default function DeafChatArrivalOverlay({ sourceLabel = 'DeafSuite' }) {
   return (
     <div className="dc-entry-overlay" aria-hidden="true">
       <span className="dc-entry-overlay__bg" />
@@ -15,7 +15,7 @@ export default function DeafChatArrivalOverlay() {
         <div className="dc-entry-overlay__card">
           <img src="/favicon.png" alt="" width="46" height="46" decoding="async" />
           <div className="dc-entry-overlay__copy">
-            <span>DeafSuite &rarr; DeafChat</span>
+            <span>{sourceLabel} &rarr; DeafChat</span>
             <strong>Accesso alla chat sicura</strong>
           </div>
         </div>
