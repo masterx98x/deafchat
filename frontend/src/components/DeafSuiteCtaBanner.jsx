@@ -1,6 +1,17 @@
 import { useEffect, useState } from 'react';
 import MatrixRainBackground from './MatrixRainBackground';
 
+function shouldInterceptNavigation(event) {
+  return !(
+    event.defaultPrevented ||
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  );
+}
+
 export default function DeafSuiteCtaBanner({
   href,
   onNavigate,
@@ -15,20 +26,25 @@ export default function DeafSuiteCtaBanner({
   }, [onWarm]);
 
   const handleNavigate = (event) => {
+    if (!shouldInterceptNavigation(event)) {
+      return;
+    }
+
     if (typeof onNavigate === 'function') {
       onNavigate(event);
       return;
     }
 
     if (href) {
+      event.preventDefault();
       window.location.assign(href);
     }
   };
 
   return (
     <div className={`deafsuite-link-cta-shell${isReady ? ' is-ready' : ''}`}>
-      <button
-        type="button"
+      <a
+        href={href}
         className="deafsuite-link-cta"
         onClick={handleNavigate}
         onMouseEnter={onWarm}
@@ -59,7 +75,7 @@ export default function DeafSuiteCtaBanner({
             <span className="deafsuite-link-cta-arrow" aria-hidden="true">&#8599;</span>
           </span>
         </span>
-      </button>
+      </a>
     </div>
   );
 }

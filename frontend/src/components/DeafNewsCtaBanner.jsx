@@ -1,5 +1,16 @@
 import { useEffect, useState } from 'react';
 
+function shouldInterceptNavigation(event) {
+  return !(
+    event.defaultPrevented ||
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  );
+}
+
 export default function DeafNewsCtaBanner({ href, onWarm }) {
   const [isReady, setIsReady] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
@@ -10,11 +21,12 @@ export default function DeafNewsCtaBanner({ href, onWarm }) {
     return () => window.clearTimeout(timer);
   }, [onWarm]);
 
-  const handleNavigate = () => {
-    if (!href || isLeaving) {
+  const handleNavigate = (event) => {
+    if (!href || isLeaving || !shouldInterceptNavigation(event)) {
       return;
     }
 
+    event.preventDefault();
     onWarm?.();
     setIsLeaving(true);
     window.setTimeout(() => {
@@ -24,8 +36,8 @@ export default function DeafNewsCtaBanner({ href, onWarm }) {
 
   return (
     <div className={`deafnews-cta-shell${isReady ? ' is-ready' : ''}${isLeaving ? ' is-leaving' : ''}`}>
-      <button
-        type="button"
+      <a
+        href={href}
         className="deafnews-cta"
         onClick={handleNavigate}
         onMouseEnter={onWarm}
@@ -55,7 +67,7 @@ export default function DeafNewsCtaBanner({ href, onWarm }) {
             <span className="deafnews-cta-arrow" aria-hidden="true">&#8599;</span>
           </span>
         </span>
-      </button>
+      </a>
     </div>
   );
 }

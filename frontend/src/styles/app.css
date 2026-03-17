@@ -736,6 +736,7 @@
 
 .deafsuite-link-cta,
 .deafnews-cta {
+  display: block;
   position: relative;
   width: 100%;
   overflow: hidden;
@@ -749,6 +750,7 @@
     transform 0.28s ease,
     box-shadow 0.32s ease,
     border-color 0.32s ease;
+  text-decoration: none;
 }
 
 .deafsuite-link-cta {
