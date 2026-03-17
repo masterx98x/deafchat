@@ -10,6 +10,279 @@
   border: 0;
 }
 
+/* ===================================================
+   DEAFCHAT LIGHTWEIGHT CTA + BACKGROUND OVERRIDES
+   =================================================== */
+
+.dc-background--lite .dc-background__glow {
+  filter: blur(84px);
+}
+
+.dc-background--lite .dc-background__glow--primary {
+  opacity: 0.72;
+}
+
+.dc-background--lite .dc-background__glow--secondary {
+  opacity: 0.5;
+}
+
+.dc-background--lite .dc-background__grid {
+  opacity: 0.08;
+}
+
+.dc-background--lite .dc-background__noise {
+  opacity: 0.018;
+}
+
+.dc-background--lite .dc-background__particle {
+  box-shadow: none;
+  opacity: 0.34;
+  animation-duration: 26s;
+}
+
+.dc-background--lite .dc-background__particle--3,
+.dc-background--lite .dc-background__particle--4 {
+  opacity: 0.2;
+}
+
+.deafsuite-link-cta-lite,
+.deafnews-cta-lite {
+  animation: none !important;
+  contain: layout paint;
+}
+
+.deafsuite-link-cta-lite {
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.24),
+    0 8px 20px rgba(9, 53, 28, 0.12),
+    inset 0 1px 0 rgba(209, 255, 225, 0.05);
+}
+
+.deafnews-cta-lite {
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.24),
+    0 8px 20px rgba(17, 44, 88, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.deafsuite-link-cta-lite:hover,
+.deafnews-cta-lite:hover {
+  transform: translateY(-1px);
+}
+
+.deafsuite-link-cta-lite .deafsuite-link-cta-content,
+.deafnews-cta-lite .deafnews-cta-content {
+  min-height: 108px;
+}
+
+.deafsuite-link-cta-line,
+.deafsuite-link-cta-codes,
+.deafsuite-link-cta-code {
+  position: absolute;
+  pointer-events: none;
+}
+
+.deafsuite-link-cta-lite .deafsuite-link-cta-backdrop {
+  background:
+    radial-gradient(circle at 14% 26%, rgba(34, 197, 94, 0.1), transparent 28%),
+    radial-gradient(circle at 78% 22%, rgba(74, 222, 128, 0.06), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 42%);
+}
+
+.deafsuite-link-cta-lite .deafsuite-link-cta-grid {
+  opacity: 0.1;
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+
+.deafsuite-link-cta-lite .deafsuite-link-cta-orb,
+.deafnews-cta-lite .deafnews-cta-energy {
+  animation: none !important;
+}
+
+.deafsuite-link-cta-lite .deafsuite-link-cta-orb {
+  filter: none;
+  mix-blend-mode: normal;
+}
+
+.deafsuite-link-cta-lite .deafsuite-link-cta-orb-a {
+  top: -60%;
+  left: -8%;
+  width: 20rem;
+  height: 20rem;
+  opacity: 0.2;
+}
+
+.deafsuite-link-cta-lite .deafsuite-link-cta-orb-b {
+  bottom: -80%;
+  right: -6%;
+  width: 18rem;
+  height: 18rem;
+  opacity: 0.14;
+}
+
+.deafsuite-link-cta-lite .deafsuite-link-cta-line {
+  top: 48%;
+  left: -12%;
+  width: 44%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(195, 255, 211, 0.8), transparent);
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.16);
+  opacity: 0.34;
+  animation: dcLiteSheen 12s linear infinite;
+}
+
+.deafsuite-link-cta-lite .deafsuite-link-cta-line-a {
+  display: block;
+}
+
+.deafsuite-link-cta-lite .deafsuite-link-cta-codes {
+  inset: 8% 11% 8% 8%;
+  z-index: -1;
+  overflow: hidden;
+  opacity: 0.18;
+}
+
+.deafsuite-link-cta-lite .deafsuite-link-cta-code {
+  top: -120%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: rgba(145, 255, 177, 0.72);
+  white-space: nowrap;
+  text-shadow: 0 0 10px rgba(34, 197, 94, 0.12);
+  animation: dcLiteCodeFall var(--dc-code-duration) linear infinite;
+}
+
+.deafsuite-link-cta-lite .deafsuite-link-cta-code-a {
+  left: 6%;
+  --dc-code-duration: 15s;
+}
+
+.deafsuite-link-cta-lite .deafsuite-link-cta-code-b {
+  left: 34%;
+  --dc-code-duration: 17s;
+  animation-delay: -4s;
+}
+
+.deafsuite-link-cta-lite .deafsuite-link-cta-code-c {
+  left: 60%;
+  --dc-code-duration: 16s;
+  animation-delay: -8s;
+}
+
+.deafsuite-link-cta-lite .deafsuite-link-cta-code-d {
+  left: 82%;
+  --dc-code-duration: 19s;
+  animation-delay: -6s;
+}
+
+.deafnews-cta-lite .deafnews-cta-backdrop {
+  background:
+    radial-gradient(circle at 16% 24%, rgba(96, 165, 250, 0.12), transparent 28%),
+    radial-gradient(circle at 74% 22%, rgba(125, 211, 252, 0.08), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 42%);
+}
+
+.deafnews-cta-lite .deafnews-cta-grid {
+  opacity: 0.1;
+}
+
+.deafnews-cta-lite .deafnews-cta-energy {
+  opacity: 0.28;
+  box-shadow: 0 0 12px rgba(96, 165, 250, 0.14);
+}
+
+.deafnews-cta-lite .deafnews-cta-energy-a {
+  animation: dcLiteEnergySweep 15s linear infinite;
+}
+
+.deafnews-cta-lite .deafnews-cta-energy-b {
+  animation: dcLiteEnergySweep 18s linear infinite;
+  animation-delay: -6s;
+}
+
+.deafnews-cta-lite .deafnews-cta-energy-c {
+  display: none;
+}
+
+@keyframes dcLiteSheen {
+  from {
+    transform: translate3d(-8%, 0, 0);
+    opacity: 0;
+  }
+
+  18%,
+  76% {
+    opacity: 0.34;
+  }
+
+  to {
+    transform: translate3d(18%, 0, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes dcLiteCodeFall {
+  from {
+    transform: translate3d(0, -24%, 0);
+    opacity: 0;
+  }
+
+  16%,
+  82% {
+    opacity: 0.72;
+  }
+
+  to {
+    transform: translate3d(0, 148%, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes dcLiteEnergySweep {
+  from {
+    transform: translate3d(-10vw, 0, 0);
+    opacity: 0;
+  }
+
+  22%,
+  72% {
+    opacity: 0.28;
+  }
+
+  to {
+    transform: translate3d(12vw, 0, 0);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 900px), (hover: none) and (pointer: coarse) {
+  .dc-background--lite .dc-background__grid,
+  .dc-background--lite .dc-background__noise,
+  .deafsuite-link-cta-lite .deafsuite-link-cta-codes,
+  .deafsuite-link-cta-lite .deafsuite-link-cta-grid,
+  .deafsuite-link-cta-lite .deafsuite-link-cta-line,
+  .deafnews-cta-lite .deafnews-cta-grid,
+  .deafnews-cta-lite .deafnews-cta-energy {
+    display: none;
+  }
+
+  .dc-background--lite .dc-background__particle--3,
+  .dc-background--lite .dc-background__particle--4 {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dc-background--lite .dc-background__particle,
+  .deafsuite-link-cta-lite .deafsuite-link-cta-code,
+  .deafsuite-link-cta-lite .deafsuite-link-cta-line,
+  .deafnews-cta-lite .deafnews-cta-energy {
+    animation: none !important;
+  }
+}
+
 .dc-app-shell {
   position: relative;
   min-height: 100vh;

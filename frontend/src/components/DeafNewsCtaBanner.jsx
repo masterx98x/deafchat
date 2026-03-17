@@ -1,55 +1,16 @@
-import { useEffect, useState } from 'react';
-
-function shouldInterceptNavigation(event) {
-  return !(
-    event.defaultPrevented ||
-    event.button !== 0 ||
-    event.metaKey ||
-    event.ctrlKey ||
-    event.shiftKey ||
-    event.altKey
-  );
-}
-
-export default function DeafNewsCtaBanner({ href, onWarm }) {
-  const [isReady, setIsReady] = useState(false);
-  const [isLeaving, setIsLeaving] = useState(false);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setIsReady(true), 80);
-    onWarm?.();
-    return () => window.clearTimeout(timer);
-  }, [onWarm]);
-
-  const handleNavigate = (event) => {
-    if (!href || isLeaving || !shouldInterceptNavigation(event)) {
-      return;
-    }
-
-    event.preventDefault();
-    onWarm?.();
-    setIsLeaving(true);
-    window.setTimeout(() => {
-      window.location.assign(href);
-    }, 240);
-  };
-
+export default function DeafNewsCtaBanner({ href }) {
   return (
-    <div className={`deafnews-cta-shell${isReady ? ' is-ready' : ''}${isLeaving ? ' is-leaving' : ''}`}>
+    <div className="deafnews-cta-shell is-ready">
       <a
         href={href}
-        className="deafnews-cta"
-        onClick={handleNavigate}
-        onMouseEnter={onWarm}
-        onFocus={onWarm}
-        onTouchStart={onWarm}
+        className="deafnews-cta deafnews-cta-lite"
+        rel="noopener"
         aria-label="Apri DeafNews"
       >
         <span className="deafnews-cta-backdrop" aria-hidden="true" />
         <span className="deafnews-cta-grid" aria-hidden="true" />
         <span className="deafnews-cta-energy deafnews-cta-energy-a" aria-hidden="true" />
         <span className="deafnews-cta-energy deafnews-cta-energy-b" aria-hidden="true" />
-        <span className="deafnews-cta-energy deafnews-cta-energy-c" aria-hidden="true" />
 
         <span className="deafnews-cta-content">
           <span className="deafnews-cta-brand">
