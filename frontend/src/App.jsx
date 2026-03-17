@@ -5,6 +5,7 @@ import DeafChatArrivalOverlay from './components/DeafChatArrivalOverlay';
 import AppShell from './components/AppShell';
 import BrandHeader from './components/BrandHeader';
 import DeafSuiteTransitionOverlay from './components/DeafSuiteTransitionOverlay';
+import ProjectCtaStack from './components/ProjectCtaStack';
 import ChatPage from './pages/ChatPage';
 import HomePage from './pages/HomePage';
 
@@ -154,8 +155,9 @@ function AppFrame() {
       transitionOverlay={shellOverlay}
       isArriving={Boolean(arrivalSource)}
     >
+      {!isChatRoute ? <BrandHeader /> : null}
       {!isChatRoute ? (
-        <BrandHeader
+        <ProjectCtaStack
           deafSuiteHref={DEAFSUITE_ENTRY_URL}
           deafNewsHref={DEAFNEWS_ENTRY_URL}
           onDeafSuiteNavigate={handleDeafSuiteNavigate}
