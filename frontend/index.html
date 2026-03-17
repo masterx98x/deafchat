@@ -5,48 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark" />
 
-  <!-- Primary SEO -->
-  <title>DeafChat – Chat temporanea anonima con videochiamate e foto</title>
-  <meta name="description" content="Chat temporanea senza registrazione con videochiamate, foto e audio. Crea una stanza, condividi il link: quando scade, tutto sparisce. Gratis e anonima." />
-  <meta name="keywords" content="chat temporanea, chat anonima, chat senza registrazione, chat privata, chat effimera, videochiamata anonima, chiamata vocale senza account, inviare foto chat, audiomessaggi, messaggi che si autodistruggono, chat sicura, DeafChat, DeafSuite" />
+  <title>DeafChat - Chat temporanea anonima con chiamate, foto e audio</title>
+  <meta
+    name="description"
+    content="DeafChat e la chat effimera di DeafSuite: stanze temporanee, niente registrazione, messaggi in RAM, chiamate private, foto e audio."
+  />
+  <meta
+    name="keywords"
+    content="chat temporanea, chat anonima, chat effimera, videochiamata anonima, chiamata vocale, privacy, messaggi in RAM, DeafChat, DeafSuite"
+  />
   <meta name="author" content="DeafSuite" />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://deafchat.deafnews.it/" />
-  <link rel="alternate" hreflang="it" href="https://deafchat.deafnews.it/" />
-  <link rel="alternate" hreflang="x-default" href="https://deafchat.deafnews.it/" />
 
-  <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://deafchat.deafnews.it/" />
-  <meta property="og:title" content="DeafChat – Chat temporanea anonima con videochiamate e foto" />
-  <meta property="og:description" content="Chat temporanea senza registrazione con videochiamate, foto e audio. Crea una stanza, condividi il link: quando scade, tutto sparisce. Gratis e anonima." />
+  <meta property="og:title" content="DeafChat - Chat effimera, privata, senza account" />
+  <meta
+    property="og:description"
+    content="Crea una stanza, condividi il link e lascia che tutto sparisca. Chat, audio, foto e chiamate private senza registrazione."
+  />
   <meta property="og:image" content="https://deafchat.deafnews.it/static/og-image.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
   <meta property="og:site_name" content="DeafChat" />
   <meta property="og:locale" content="it_IT" />
 
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="DeafChat – Chat temporanea anonima con videochiamate e foto" />
-  <meta name="twitter:description" content="Chat temporanea senza registrazione con videochiamate, foto e audio. Crea una stanza, condividi il link: quando scade, tutto sparisce." />
+  <meta name="twitter:title" content="DeafChat - Chat effimera, privata, senza account" />
+  <meta
+    name="twitter:description"
+    content="Crea una stanza, condividi il link e lascia che tutto sparisca. Chat, audio, foto e chiamate private senza registrazione."
+  />
   <meta name="twitter:image" content="https://deafchat.deafnews.it/static/og-image.png" />
 
-  <!-- Favicon & theme -->
   <link rel="icon" href="/static/favicon.png" type="image/png" />
   <link rel="apple-touch-icon" href="/static/favicon.png" />
-  <meta name="theme-color" content="#020617" />
+  <meta name="theme-color" content="#090506" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-  <!-- Structured Data (JSON-LD) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "DeafChat",
     "url": "https://deafchat.deafnews.it/",
-    "description": "Chat temporanea, anonima e senza registrazione con videochiamate, chiamate vocali, invio foto e audiomessaggi. Messaggi effimeri che si autodistruggono.",
+    "description": "Chat temporanea, anonima e senza registrazione con chiamate private, foto e audiomessaggi.",
     "applicationCategory": "CommunicationApplication",
     "operatingSystem": "All",
     "offers": {
@@ -61,352 +64,261 @@
     },
     "featureList": [
       "Chat senza registrazione",
-      "Messaggi effimeri con autodistruzione",
-      "Videochiamate 1-to-1 in tempo reale",
+      "Messaggi effimeri in memoria RAM",
+      "Videochiamate private 1-to-1",
       "Chiamate vocali peer-to-peer",
       "Invio foto nella chat",
       "Audiomessaggi in tempo reale",
-      "Stanze private e di gruppo",
       "Link condivisibile senza installazione",
-      "Nessun dato salvato su disco"
+      "Nessun database e nessuna traccia persistente"
     ]
   }
   </script>
 
-  <!-- Fonts: preconnect + non-blocking load (S6/S7) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" />
-
-  <link rel="stylesheet" href="/static/css/style.css?v=7" />
+  <link rel="stylesheet" href="/static/css/style.css?v=10" />
 </head>
-<body class="dc-body">
-  <header class="dc-header">
+<body class="dc-body dc-home-body">
+  <div class="dc-backdrop">
+    <div class="dc-backdrop-grid" aria-hidden="true"></div>
+    <div class="dc-backdrop-orb dc-backdrop-orb-a" aria-hidden="true"></div>
+    <div class="dc-backdrop-orb dc-backdrop-orb-b" aria-hidden="true"></div>
+  </div>
+
+  <header class="dc-header dc-suite-header">
     <div class="dc-container dc-header-inner">
-      <p class="dc-logo">
-        <span class="dc-logo-badge" aria-hidden="true"><img src="/static/favicon.png" alt="" /></span>
-        <span class="dc-logo-text">DeafChat</span>
-      </p>
+      <div class="dc-brand-lockup">
+        <p class="dc-logo">
+          <span class="dc-logo-badge" aria-hidden="true"><img src="/static/favicon.png" alt="" /></span>
+          <span class="dc-logo-copy">
+            <span class="dc-logo-text">DeafChat</span>
+            <span class="dc-logo-subtext">Privacy-first realtime chat</span>
+          </span>
+        </p>
+      </div>
       <nav class="dc-nav" aria-label="Navigazione principale">
         <a href="https://www.deafsuite.it/" class="dc-nav-btn" target="_blank" rel="noopener noreferrer">DeafSuite</a>
         <a href="https://deafnews.it/" class="dc-nav-btn" target="_blank" rel="noopener noreferrer">DeafNews</a>
       </nav>
     </div>
-    <p class="dc-tagline">Chat temporanea &bull; Videochiamate &bull; Foto &bull; Senza registrazione</p>
   </header>
 
   <main class="dc-main">
-    <div class="dc-container">
-      <!-- Hero section -->
+    <div class="dc-container dc-home-shell">
       <section class="dc-hero" aria-label="Crea una nuova chat">
-        <h1 class="dc-hero-title">Chat temporanea anonima con videochiamate, foto e audiomessaggi</h1>
-        <p class="dc-hero-desc">
-          Crea una stanza in un click, condividi il link e comunica in modo sicuro.
-          Testo, videochiamate 1-to-1, chiamate vocali peer-to-peer, invio foto e note vocali &mdash; tutto senza registrazione e senza installare nulla.
-          Nessun account, nessun dato salvato su disco. Quando la stanza scade, tutti i messaggi spariscono per sempre.
-        </p>
-
-        <form id="create-room-form" class="dc-create-form" aria-label="Crea stanza">
-          <div class="dc-form-row">
-            <label for="room-name" class="dc-label">Nome stanza <span class="dc-optional">(opzionale)</span></label>
-            <input
-              type="text"
-              id="room-name"
-              name="room_name"
-              class="dc-input"
-              placeholder="Es. Riunione team, Chat veloce..."
-              maxlength="60"
-              autocomplete="off"
-            />
+        <div class="dc-hero-copy">
+          <div class="dc-kicker-row">
+            <span class="dc-kicker">DeafSuite Frontend DNA</span>
+            <span class="dc-kicker dc-kicker-muted">Palette red-black</span>
           </div>
 
-          <div class="dc-form-row">
-            <label for="expiry" class="dc-label">Autodistruzione</label>
-            <div class="dc-expiry-group">
-              <label class="dc-expiry-option">
-                <input type="radio" name="expiry_minutes" value="5" />
-                <span class="dc-expiry-chip">5 min</span>
-              </label>
-              <label class="dc-expiry-option">
-                <input type="radio" name="expiry_minutes" value="15" />
-                <span class="dc-expiry-chip">15 min</span>
-              </label>
-              <label class="dc-expiry-option">
-                <input type="radio" name="expiry_minutes" value="30" checked />
-                <span class="dc-expiry-chip">30 min</span>
-              </label>
-              <label class="dc-expiry-option">
-                <input type="radio" name="expiry_minutes" value="60" />
-                <span class="dc-expiry-chip">1 ora</span>
-              </label>
-              <label class="dc-expiry-option">
-                <input type="radio" name="expiry_minutes" value="120" />
-                <span class="dc-expiry-chip">2 ore</span>
-              </label>
-            </div>
+          <h1 class="dc-hero-title">La chat effimera di DeafSuite, piu decisa, piu scura, piu diretta.</h1>
+          <p class="dc-hero-desc">
+            Crea una stanza in un click, condividi il link e comunica senza account.
+            Testo, foto, audio, chiamate vocali e video private: tutto gira nel browser,
+            tutto resta temporaneo, tutto e pensato per sparire.
+          </p>
+
+          <div class="dc-trust-strip" aria-label="Punti chiave">
+            <span class="dc-trust-chip">Zero registrazione</span>
+            <span class="dc-trust-chip">Stanze in RAM</span>
+            <span class="dc-trust-chip">Link istantaneo</span>
+            <span class="dc-trust-chip">Video 1-to-1</span>
           </div>
 
-          <div class="dc-form-row">
-            <label class="dc-label">Tipo</label>
-            <div class="dc-radio-group">
-              <label class="dc-radio-label">
-                <input type="radio" name="room_type" value="private" checked />
-                <span class="dc-radio-text">
-                  <span class="dc-radio-icon" aria-hidden="true">🔒</span>
-                  Privata (1-to-1)
-                </span>
-              </label>
-              <label class="dc-radio-label">
-                <input type="radio" name="room_type" value="group" />
-                <span class="dc-radio-text">
-                  <span class="dc-radio-icon" aria-hidden="true">👥</span>
-                  Gruppo
-                </span>
-              </label>
-            </div>
+          <div class="dc-stat-grid" aria-label="Metriche di prodotto">
+            <article class="dc-stat-card">
+              <strong>5-120 min</strong>
+              <span>Timer di autodistruzione stanza</span>
+            </article>
+            <article class="dc-stat-card">
+              <strong>2 modalita</strong>
+              <span>Privata 1-to-1 o gruppo</span>
+            </article>
+            <article class="dc-stat-card">
+              <strong>0 database</strong>
+              <span>Nessun salvataggio persistente</span>
+            </article>
           </div>
-
-          <button type="submit" class="dc-btn dc-btn-primary dc-btn-lg" id="create-btn">
-            Crea stanza
-          </button>
-        </form>
-      </section>
-
-      <!-- Link result (hidden by default) -->
-      <section id="room-result" class="dc-result" hidden aria-live="polite">
-        <h3 class="dc-result-title">La tua stanza è pronta!</h3>
-        <div class="dc-link-box">
-          <input
-            type="text"
-            id="room-link"
-            class="dc-input dc-link-input"
-            readonly
-            aria-label="Link della stanza"
-          />
-          <button type="button" class="dc-btn dc-btn-secondary" id="copy-link-btn" aria-label="Copia link">
-            📋 Copia
-          </button>
         </div>
-        <div class="dc-result-actions">
-          <a id="go-to-room" href="#" class="dc-btn dc-btn-primary">Entra nella stanza</a>
-          <button type="button" class="dc-btn dc-btn-ghost" id="new-room-btn">Crea un'altra stanza</button>
+
+        <div class="dc-hero-side">
+          <section class="dc-control-card" aria-labelledby="create-room-heading">
+            <div class="dc-control-head">
+              <p class="dc-card-eyebrow">Create Secure Room</p>
+              <h2 id="create-room-heading">Avvia una stanza DeafChat</h2>
+              <p>Scegli durata, tipo e nome. Il link nasce subito ed e pronto per essere condiviso.</p>
+            </div>
+
+            <form id="create-room-form" class="dc-create-form" aria-label="Crea stanza">
+              <div class="dc-form-row">
+                <label for="room-name" class="dc-label">Nome stanza <span class="dc-optional">(opzionale)</span></label>
+                <input
+                  type="text"
+                  id="room-name"
+                  name="room_name"
+                  class="dc-input"
+                  placeholder="Es. Briefing, call rapida, chat privata"
+                  maxlength="60"
+                  autocomplete="off"
+                />
+              </div>
+
+              <div class="dc-form-row">
+                <label for="expiry" class="dc-label">Autodistruzione</label>
+                <div class="dc-expiry-group">
+                  <label class="dc-expiry-option">
+                    <input type="radio" name="expiry_minutes" value="5" />
+                    <span class="dc-expiry-chip">5 min</span>
+                  </label>
+                  <label class="dc-expiry-option">
+                    <input type="radio" name="expiry_minutes" value="15" />
+                    <span class="dc-expiry-chip">15 min</span>
+                  </label>
+                  <label class="dc-expiry-option">
+                    <input type="radio" name="expiry_minutes" value="30" checked />
+                    <span class="dc-expiry-chip">30 min</span>
+                  </label>
+                  <label class="dc-expiry-option">
+                    <input type="radio" name="expiry_minutes" value="60" />
+                    <span class="dc-expiry-chip">1 ora</span>
+                  </label>
+                  <label class="dc-expiry-option">
+                    <input type="radio" name="expiry_minutes" value="120" />
+                    <span class="dc-expiry-chip">2 ore</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="dc-form-row">
+                <label class="dc-label">Tipo stanza</label>
+                <div class="dc-radio-group">
+                  <label class="dc-radio-label">
+                    <input type="radio" name="room_type" value="private" checked />
+                    <span class="dc-radio-text">
+                      <span class="dc-radio-icon" aria-hidden="true">Privata</span>
+                      1-to-1 con chiamate
+                    </span>
+                  </label>
+                  <label class="dc-radio-label">
+                    <input type="radio" name="room_type" value="group" />
+                    <span class="dc-radio-text">
+                      <span class="dc-radio-icon" aria-hidden="true">Gruppo</span>
+                      Chat multipla effimera
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <button type="submit" class="dc-btn dc-btn-primary dc-btn-lg" id="create-btn">
+                Crea stanza
+              </button>
+            </form>
+          </section>
+
+          <section id="room-result" class="dc-result" hidden aria-live="polite">
+            <p class="dc-card-eyebrow">Room Ready</p>
+            <h3 class="dc-result-title">La stanza e pronta</h3>
+            <p class="dc-result-copy">Copia il link oppure entra subito. Da qui in poi il timer e gia attivo.</p>
+            <div class="dc-link-box">
+              <input
+                type="text"
+                id="room-link"
+                class="dc-input dc-link-input"
+                readonly
+                aria-label="Link della stanza"
+              />
+              <button type="button" class="dc-btn dc-btn-secondary" id="copy-link-btn" aria-label="Copia link">
+                Copia
+              </button>
+            </div>
+            <div class="dc-result-actions">
+              <a id="go-to-room" href="#" class="dc-btn dc-btn-primary">Entra nella stanza</a>
+              <button type="button" class="dc-btn dc-btn-ghost" id="new-room-btn">Nuova stanza</button>
+            </div>
+          </section>
         </div>
       </section>
 
-      <!-- Features -->
-      <section class="dc-features" aria-label="Caratteristiche di DeafChat">
-        <h2 class="sr-only">Funzionalità principali di DeafChat</h2>
+      <section class="dc-features" aria-label="Caratteristiche principali">
         <article class="dc-feature">
-          <span class="dc-feature-icon" aria-hidden="true">⏳</span>
-          <h3>Chat effimera con autodistruzione</h3>
-          <p>Scegli il timer di autodistruzione: 5 min, 15 min, 30 min, 1 ora o 2 ore. Allo scadere, la stanza e tutti i messaggi spariscono per sempre.</p>
+          <span class="dc-feature-icon" aria-hidden="true">01</span>
+          <h3>Effimera davvero</h3>
+          <p>Timer tra 5 minuti e 2 ore. Quando scade, la stanza sparisce e il contenuto non resta in archivio.</p>
         </article>
         <article class="dc-feature">
-          <span class="dc-feature-icon" aria-hidden="true">📹</span>
-          <h3>Videochiamate private 1-to-1</h3>
-          <p>Avvia videochiamate peer-to-peer nelle stanze private. Connessione diretta WebRTC, senza server intermedi. Basta un click per chiamare.</p>
+          <span class="dc-feature-icon" aria-hidden="true">02</span>
+          <h3>Private calls</h3>
+          <p>Nelle stanze 1-to-1 puoi passare subito da testo a voce o video senza passaggi intermedi.</p>
         </article>
         <article class="dc-feature">
-          <span class="dc-feature-icon" aria-hidden="true">📞</span>
-          <h3>Chiamate vocali senza account</h3>
-          <p>Preferisci solo la voce? Le chiamate vocali anonime funzionano con lo stesso sistema peer-to-peer, leggere e immediate.</p>
+          <span class="dc-feature-icon" aria-hidden="true">03</span>
+          <h3>Foto e audio nativi</h3>
+          <p>Invii rapidi, interfaccia mobile-first e feedback realtime pensato per un uso veloce e pulito.</p>
         </article>
         <article class="dc-feature">
-          <span class="dc-feature-icon" aria-hidden="true">📷</span>
-          <h3>Invio foto nella chat</h3>
-          <p>Condividi immagini direttamente in chat senza registrazione. Le foto vivono solo in memoria RAM e spariscono con la stanza. Visualizzale a schermo intero con un tap.</p>
-        </article>
-        <article class="dc-feature">
-          <span class="dc-feature-icon" aria-hidden="true">🎤</span>
-          <h3>Audiomessaggi in tempo reale</h3>
-          <p>Registra e invia note vocali in tempo reale. Player integrato con forma d'onda, direttamente nella chat anonima.</p>
-        </article>
-        <article class="dc-feature">
-          <span class="dc-feature-icon" aria-hidden="true">🔐</span>
-          <h3>Chat senza registrazione</h3>
-          <p>Nessun account, nessuna email, nessun numero di telefono richiesto. Scegli un nickname e inizia subito a chattare in totale anonimato.</p>
-        </article>
-        <article class="dc-feature">
-          <span class="dc-feature-icon" aria-hidden="true">🗑️</span>
-          <h3>Zero tracce</h3>
-          <p>I messaggi, le foto e gli audio vivono solo in memoria RAM. Nessun database, nessun log, nulla viene salvato su disco.</p>
-        </article>
-        <article class="dc-feature">
-          <span class="dc-feature-icon" aria-hidden="true">🔗</span>
-          <h3>Link condivisibile istantaneo</h3>
-          <p>Condividi un semplice link per invitare chiunque nella tua stanza privata. Nessuna app da installare, funziona direttamente nel browser.</p>
-        </article>
-        <article class="dc-feature">
-          <span class="dc-feature-icon" aria-hidden="true">📱</span>
-          <h3>Ottimizzata per mobile</h3>
-          <p>Funziona perfettamente su smartphone, tablet e desktop senza installare alcuna app. Design responsive ottimizzato per ogni schermo.</p>
+          <span class="dc-feature-icon" aria-hidden="true">04</span>
+          <h3>Un link e basta</h3>
+          <p>Nessuna registrazione, nessuna installazione: apri il link, scegli il nickname, entra.</p>
         </article>
       </section>
 
-      <!-- FAQ Section (SEO + Schema) -->
+      <section class="dc-process-grid" aria-label="Come funziona">
+        <article class="dc-process-card">
+          <p class="dc-card-eyebrow">Step 1</p>
+          <h3>Crea</h3>
+          <p>Definisci tipo stanza e tempo di vita. DeafChat genera un room ID pulito e un link condivisibile.</p>
+        </article>
+        <article class="dc-process-card">
+          <p class="dc-card-eyebrow">Step 2</p>
+          <h3>Condividi</h3>
+          <p>Passa il link alla persona giusta o al gruppo. Nessun onboarding, nessun account, nessun attrito.</p>
+        </article>
+        <article class="dc-process-card">
+          <p class="dc-card-eyebrow">Step 3</p>
+          <h3>Sparisce</h3>
+          <p>Alla scadenza della stanza, tutto il contenuto viene rimosso e la sessione si chiude.</p>
+        </article>
+      </section>
+
       <section class="dc-faq" aria-label="Domande frequenti su DeafChat">
-        <h2 class="dc-faq-title">Domande frequenti su DeafChat</h2>
+        <h2 class="dc-faq-title">Domande frequenti</h2>
         <div class="dc-faq-list">
           <details class="dc-faq-item">
-            <summary class="dc-faq-question">DeafChat è gratuito?</summary>
-            <p class="dc-faq-answer">Sì, DeafChat è completamente gratuito e non richiede alcuna registrazione. Tutte le funzionalità — chat, videochiamate, chiamate vocali, foto e audio — sono incluse.</p>
+            <summary class="dc-faq-question">DeafChat e gratuito?</summary>
+            <p class="dc-faq-answer">Si. Non richiede registrazione e include chat, audio, foto e chiamate private.</p>
           </details>
           <details class="dc-faq-item">
-            <summary class="dc-faq-question">Come funziona l'autodistruzione dei messaggi?</summary>
-            <p class="dc-faq-answer">Quando crei una stanza scegli un timer (da 5 minuti a 2 ore). Allo scadere del tempo, la stanza e tutti i contenuti (messaggi, foto, audio) vengono cancellati dalla memoria del server. Non esiste modo di recuperarli.</p>
+            <summary class="dc-faq-question">I messaggi vengono salvati?</summary>
+            <p class="dc-faq-answer">No. Il progetto e concepito per lavorare in memoria e non come archivio persistente.</p>
           </details>
           <details class="dc-faq-item">
-            <summary class="dc-faq-question">I miei messaggi sono salvati da qualche parte?</summary>
-            <p class="dc-faq-answer">No. I messaggi, le foto e gli audio esistono solo nella RAM del server durante la sessione. Non c'è nessun database, nessun log e nessun backup. Quando la stanza scade, tutto sparisce.</p>
+            <summary class="dc-faq-question">Serve installare qualcosa?</summary>
+            <p class="dc-faq-answer">No. Funziona direttamente nel browser su smartphone, tablet e desktop.</p>
           </details>
           <details class="dc-faq-item">
-            <summary class="dc-faq-question">Come funzionano le videochiamate?</summary>
-            <p class="dc-faq-answer">Nelle stanze private 1-to-1 puoi avviare videochiamate o chiamate vocali con un click. La connessione è peer-to-peer (WebRTC): il video e l'audio passano direttamente tra i due dispositivi, senza transitare dal server.</p>
+            <summary class="dc-faq-question">Le chiamate passano dal server?</summary>
+            <p class="dc-faq-answer">Il signaling passa dal backend, mentre audio e video usano WebRTC e TURN quando serve.</p>
           </details>
           <details class="dc-faq-item">
-            <summary class="dc-faq-question">Posso inviare foto nella chat?</summary>
-            <p class="dc-faq-answer">Sì! Clicca l'icona 📷 nella barra dei messaggi per inviare un'immagine (JPEG, PNG, GIF, WebP, max 5 MB). Le foto vengono visualizzate direttamente in chat e puoi aprirle a schermo intero con un click.</p>
-          </details>
-          <details class="dc-faq-item">
-            <summary class="dc-faq-question">Devo installare un'app?</summary>
-            <p class="dc-faq-answer">No, DeafChat funziona direttamente nel browser. Basta aprire il link e iniziare a chattare. Funziona su qualsiasi dispositivo con un browser moderno.</p>
-          </details>
-          <details class="dc-faq-item">
-            <summary class="dc-faq-question">Posso inviare messaggi vocali?</summary>
-            <p class="dc-faq-answer">Sì! Puoi registrare e inviare audiomessaggi direttamente nella chat con il player integrato. Serve HTTPS e il permesso del microfono nel browser.</p>
-          </details>
-          <details class="dc-faq-item">
-            <summary class="dc-faq-question">DeafChat è sicuro? I miei dati sono protetti?</summary>
-            <p class="dc-faq-answer">DeafChat è progettato con la privacy al centro. Tutti i messaggi esistono solo in memoria RAM e non vengono mai scritti su disco. Le videochiamate sono peer-to-peer (il video non transita dal server). Non raccogliamo dati personali, email o numeri di telefono. Quando la stanza scade, tutto è cancellato definitivamente.</p>
-          </details>
-          <details class="dc-faq-item">
-            <summary class="dc-faq-question">Quante persone possono partecipare a una stanza?</summary>
-            <p class="dc-faq-answer">Le stanze private (1-to-1) supportano 2 partecipanti con la possibilità di fare videochiamate e chiamate vocali. Le stanze di gruppo possono ospitare fino a 50 partecipanti con chat testuale, foto e audiomessaggi.</p>
-          </details>
-          <details class="dc-faq-item">
-            <summary class="dc-faq-question">Posso usare DeafChat su iPhone, Android e computer?</summary>
-            <p class="dc-faq-answer">Sì, DeafChat funziona su qualsiasi dispositivo con un browser moderno: iPhone, Android, Windows, Mac e Linux. Non serve installare alcuna app — basta aprire il link nel browser.</p>
+            <summary class="dc-faq-question">Posso usare stanze di gruppo?</summary>
+            <p class="dc-faq-answer">Si. Le stanze di gruppo sono perfette per testo, foto e audio veloci senza accedere a un account.</p>
           </details>
         </div>
       </section>
-
-      <!-- FAQ Schema (JSON-LD) -->
-      <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "DeafChat è gratuito?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Sì, DeafChat è completamente gratuito e non richiede alcuna registrazione. Tutte le funzionalità — chat, videochiamate, chiamate vocali, foto e audio — sono incluse."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Come funziona l'autodistruzione dei messaggi?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Quando crei una stanza scegli un timer (da 5 minuti a 2 ore). Allo scadere del tempo, la stanza e tutti i contenuti vengono cancellati dalla memoria del server."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "I miei messaggi sono salvati da qualche parte?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "No. I messaggi, le foto e gli audio esistono solo nella RAM del server. Non c'è nessun database, nessun log e nessun backup."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Come funzionano le videochiamate?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Nelle stanze private 1-to-1 puoi avviare videochiamate o chiamate vocali con un click. La connessione è peer-to-peer (WebRTC): video e audio passano direttamente tra i dispositivi, senza transitare dal server."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Posso inviare foto nella chat?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Sì, clicca l'icona 📷 per inviare immagini (JPEG, PNG, GIF, WebP, max 5 MB). Le foto si visualizzano in chat e si aprono a schermo intero con un click."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Devo installare un'app?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "No, DeafChat funziona direttamente nel browser su qualsiasi dispositivo."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Posso inviare messaggi vocali?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Sì, puoi registrare e inviare audiomessaggi direttamente nella chat con il player integrato."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "DeafChat è sicuro? I miei dati sono protetti?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "DeafChat è progettato con la privacy al centro. Tutti i messaggi esistono solo in memoria RAM. Le videochiamate sono peer-to-peer. Non raccogliamo dati personali. Quando la stanza scade, tutto è cancellato definitivamente."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Quante persone possono partecipare a una stanza?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Le stanze private supportano 2 partecipanti con videochiamate. Le stanze di gruppo ospitano fino a 50 partecipanti con chat, foto e audiomessaggi."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Posso usare DeafChat su iPhone, Android e computer?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Sì, DeafChat funziona su qualsiasi dispositivo con un browser moderno. Non serve installare alcuna app."
-            }
-          }
-        ]
-      }
-      </script>
-
-      <!-- BreadcrumbList Schema (S14) -->
-      <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": "https://deafchat.deafnews.it/"
-          }
-        ]
-      }
-      </script>
     </div>
   </main>
 
   <footer class="dc-footer">
-    <div class="dc-container">
-      <p>
-        <strong>DeafChat</strong> &ndash; chat temporanea anonima senza registrazione.
-        Un progetto del laboratorio
-        <a href="https://www.deafsuite.it/" rel="noopener noreferrer" target="_blank">DeafSuite</a>.
+    <div class="dc-container dc-footer-inner">
+      <p class="dc-footer-copy">
+        <strong>DeafChat</strong> e il modulo di chat effimera del laboratorio DeafSuite: realtime, privacy-first, senza archivio.
       </p>
       <p class="dc-footer-links">
-        Chat effimera &bull; Videochiamate anonime &bull; Messaggi che si autodistruggono &bull;
+        <a href="https://www.deafsuite.it/" rel="noopener noreferrer" target="_blank">DeafSuite</a>
+        <span>&bull;</span>
         <a href="https://deafnews.it/" rel="noopener noreferrer" target="_blank">DeafNews</a>
       </p>
     </div>

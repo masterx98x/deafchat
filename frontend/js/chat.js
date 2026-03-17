@@ -399,7 +399,19 @@
   async function loadRoomInfo() {
     try {
       const res = await fetch(`/api/rooms/${roomId}`);
-      if (!res.ok) return;
+      if (!res.ok) {
+        overlayRoomName.textContent = 'Stanza non trovata o scaduta';
+        document.title = 'Stanza non trovata - DeafChat';
+        nicknameInput.disabled = true;
+        nicknameInput.placeholder = 'Stanza non disponibile';
+        const submitBtn = nicknameForm.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Stanza scaduta';
+        }
+        showToast('Stanza non trovata o scaduta.', 'error');
+        return;
+      }
       const data = await res.json();
       chatRoomName.textContent = data.room_name || 'Chat';
       overlayRoomName.textContent = data.room_name || 'Chat';

@@ -1,13 +1,25 @@
 services:
-  deafchat:
-    build: .
-    container_name: deafchat
+  frontend:
+    build:
+      context: ./frontend
+    container_name: deafchat-frontend
+    depends_on:
+      - backend
     ports:
-      - "8000:8000"
+      - "8080:80"
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deafchat-backend
     env_file:
       - .env
     depends_on:
       - coturn
+    ports:
+      - "8000:8000"
     restart: unless-stopped
 
   coturn:

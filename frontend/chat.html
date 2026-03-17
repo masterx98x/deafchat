@@ -5,21 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Chat – DeafChat</title>
-  <meta name="description" content="Stanza di chat temporanea su DeafChat. I messaggi si autodistruggono allo scadere del timer." />
+  <title>Chat - DeafChat</title>
+  <meta name="description" content="Stanza DeafChat temporanea con messaggi, foto, audio e chiamate private." />
   <link rel="icon" href="/static/favicon.png" type="image/png" />
-  <!-- Fonts: preconnect + non-blocking load -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="/static/css/style.css?v=7" />
+  <link rel="stylesheet" href="/static/css/style.css?v=10" />
 </head>
-<body class="dc-body">
-  <!-- Nickname overlay -->
+<body class="dc-body dc-chat-body">
   <div id="nickname-overlay" class="dc-overlay" role="dialog" aria-modal="true" aria-label="Scegli un nickname">
     <div class="dc-overlay-card">
+      <p class="dc-card-eyebrow">Join Secure Room</p>
       <h2 class="dc-overlay-title">
-        <span class="dc-logo-badge" aria-hidden="true"><img src="/static/favicon.png" alt="" /></span> Entra nella chat
+        <span class="dc-logo-badge" aria-hidden="true"><img src="/static/favicon.png" alt="" /></span>
+        Entra nella chat
       </h2>
       <p class="dc-overlay-desc" id="overlay-room-name"></p>
       <form id="nickname-form" class="dc-overlay-form">
@@ -28,7 +28,7 @@
           type="text"
           id="nickname-input"
           class="dc-input"
-          placeholder="Es. Marco, LIS_user, ..."
+          placeholder="Es. Marco, Delta, SecureGuest"
           maxlength="30"
           required
           autocomplete="off"
@@ -39,12 +39,12 @@
     </div>
   </div>
 
-  <!-- Chat interface (hidden until joined) -->
   <div id="chat-app" class="dc-chat-app" hidden>
     <header class="dc-chat-header">
       <div class="dc-chat-header-left">
         <a href="/" class="dc-chat-back" aria-label="Torna alla home" title="Torna alla home">&larr;</a>
-        <div>
+        <div class="dc-chat-title-wrap">
+          <p class="dc-card-eyebrow">Ephemeral Session</p>
           <h1 class="dc-chat-room-name" id="chat-room-name">Chat</h1>
           <div class="dc-chat-meta">
             <span class="dc-chat-members-count" id="members-count">0 partecipanti</span>
@@ -52,26 +52,79 @@
           </div>
         </div>
       </div>
+
       <div class="dc-chat-header-right">
         <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm" id="videocall-btn" aria-label="Avvia videochiamata" title="Videochiamata" hidden>
-          📹
+          <span class="dc-btn-label">Video</span>
         </button>
         <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm" id="voicecall-btn" aria-label="Avvia chiamata vocale" title="Chiamata vocale" hidden>
-          📞
+          <span class="dc-btn-label">Voice</span>
         </button>
         <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm dc-notif-btn" id="notif-toggle" aria-label="Attiva notifiche" title="Notifiche">
-          🔔<span class="dc-notif-dot"></span>
+          <span class="dc-btn-label">Notify</span><span class="dc-notif-dot"></span>
         </button>
         <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm" id="share-btn" aria-label="Condividi link" title="Condividi link">
-          🔗
+          <span class="dc-btn-label">Share</span>
         </button>
         <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm" id="members-toggle" aria-label="Mostra partecipanti" title="Partecipanti">
-          👥
+          <span class="dc-btn-label">Members</span>
         </button>
       </div>
     </header>
 
-    <!-- Members sidebar -->
+    <div class="dc-chat-shell">
+      <aside class="dc-chat-aside" aria-label="Informazioni stanza">
+        <section class="dc-side-card">
+          <p class="dc-card-eyebrow">Privacy Layer</p>
+          <h2>Stanza effimera, nessun account.</h2>
+          <p>
+            Qui la chat e pensata per essere rapida, discreta e temporanea.
+            Il focus e sulla conversazione, non sull'archivio.
+          </p>
+        </section>
+
+        <section class="dc-side-card">
+          <p class="dc-card-eyebrow">Quick Tips</p>
+          <ul class="dc-side-list">
+            <li>Usa <strong>Share</strong> per copiare il link della stanza.</li>
+            <li>Nelle room private puoi attivare voice o video.</li>
+            <li>Foto e audio restano legati alla vita della stanza.</li>
+          </ul>
+        </section>
+      </aside>
+
+      <section class="dc-chat-stage" aria-label="Stream dei messaggi">
+        <div class="dc-chat-stage-frame">
+          <div id="messages" class="dc-messages" role="log" aria-live="polite" aria-label="Messaggi della chat"></div>
+        </div>
+
+        <div id="recording-bar" class="dc-recording-bar" hidden>
+          <span class="dc-rec-dot"></span>
+          <span class="dc-rec-label">Registrazione</span>
+          <span class="dc-rec-timer" id="rec-timer">0:00</span>
+          <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm" id="rec-cancel" aria-label="Annulla registrazione">Annulla</button>
+          <button type="button" class="dc-btn dc-btn-primary dc-btn-sm" id="rec-stop" aria-label="Invia audio">Invia</button>
+        </div>
+
+        <form id="message-form" class="dc-message-form">
+          <label for="message-input" class="sr-only">Scrivi un messaggio</label>
+          <input
+            type="text"
+            id="message-input"
+            class="dc-input dc-message-input"
+            placeholder="Scrivi un messaggio..."
+            maxlength="2000"
+            autocomplete="off"
+            required
+          />
+          <input type="file" id="photo-input" accept="image/*" hidden />
+          <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm dc-photo-btn" id="photo-btn" aria-label="Invia foto" title="Invia foto">Foto</button>
+          <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm dc-mic-btn" id="mic-btn" aria-label="Registra audiomessaggio" title="Audiomessaggio">Audio</button>
+          <button type="submit" class="dc-btn dc-btn-primary dc-send-btn" aria-label="Invia messaggio">Invia</button>
+        </form>
+      </section>
+    </div>
+
     <aside id="members-sidebar" class="dc-members-sidebar" hidden>
       <div class="dc-members-header">
         <h2>Partecipanti</h2>
@@ -79,59 +132,21 @@
       </div>
       <ul id="members-list" class="dc-members-list"></ul>
     </aside>
-
-    <!-- Messages area -->
-    <div id="messages" class="dc-messages" role="log" aria-live="polite" aria-label="Messaggi della chat"></div>
-
-    <!-- Recording indicator (hidden by default) -->
-    <div id="recording-bar" class="dc-recording-bar" hidden>
-      <span class="dc-rec-dot"></span>
-      <span class="dc-rec-label">Registrazione</span>
-      <span class="dc-rec-timer" id="rec-timer">0:00</span>
-      <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm" id="rec-cancel" aria-label="Annulla registrazione">✕</button>
-      <button type="button" class="dc-btn dc-btn-primary dc-btn-sm" id="rec-stop" aria-label="Invia audio">Invia 🎤</button>
-    </div>
-
-    <!-- Input bar -->
-    <form id="message-form" class="dc-message-form">
-      <label for="message-input" class="sr-only">Scrivi un messaggio</label>
-      <input
-        type="text"
-        id="message-input"
-        class="dc-input dc-message-input"
-        placeholder="Scrivi un messaggio..."
-        maxlength="2000"
-        autocomplete="off"
-        required
-      />
-      <input type="file" id="photo-input" accept="image/*" hidden />
-      <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm dc-photo-btn" id="photo-btn" aria-label="Invia foto" title="Invia foto">
-        📷
-      </button>
-      <button type="button" class="dc-btn dc-btn-ghost dc-btn-sm dc-mic-btn" id="mic-btn" aria-label="Registra audiomessaggio" title="Audiomessaggio">
-        🎤
-      </button>
-      <button type="submit" class="dc-btn dc-btn-primary dc-send-btn" aria-label="Invia messaggio">
-        Invia
-      </button>
-    </form>
   </div>
 
-  <!-- Video call: incoming call modal -->
   <div id="call-incoming" class="dc-call-incoming" hidden>
     <div class="dc-call-incoming-card">
       <div class="dc-call-incoming-pulse"></div>
-      <span class="dc-call-incoming-icon" id="call-incoming-icon">📹</span>
-      <h3 class="dc-call-incoming-title" id="call-incoming-title">Videochiamata in arrivo</h3>
+      <span class="dc-call-incoming-icon" id="call-incoming-icon">Call</span>
+      <h3 class="dc-call-incoming-title" id="call-incoming-title">Chiamata in arrivo</h3>
       <p class="dc-call-incoming-from" id="call-from-nick"></p>
       <div class="dc-call-incoming-actions">
-        <button type="button" class="dc-btn dc-call-btn-accept" id="call-accept-btn">✓ Accetta</button>
-        <button type="button" class="dc-btn dc-call-btn-reject" id="call-reject-btn">✕ Rifiuta</button>
+        <button type="button" class="dc-btn dc-call-btn-accept" id="call-accept-btn">Accetta</button>
+        <button type="button" class="dc-btn dc-call-btn-reject" id="call-reject-btn">Rifiuta</button>
       </div>
     </div>
   </div>
 
-  <!-- Video call: full-screen overlay -->
   <div id="videocall-overlay" class="dc-videocall-overlay" hidden>
     <div class="dc-videocall-container">
       <video id="remote-video" class="dc-video-remote" autoplay playsinline></video>
@@ -139,15 +154,14 @@
       <div class="dc-videocall-bar">
         <span class="dc-videocall-status" id="videocall-status">Connessione...</span>
         <div class="dc-videocall-controls">
-          <button type="button" class="dc-btn dc-vcall-ctrl" id="vcall-toggle-audio" title="Microfono" aria-label="Mute/Unmute">🎤</button>
-          <button type="button" class="dc-btn dc-vcall-ctrl" id="vcall-toggle-video" title="Videocamera" aria-label="Attiva/Disattiva video">📹</button>
-          <button type="button" class="dc-btn dc-vcall-hangup" id="vcall-hangup" title="Chiudi chiamata" aria-label="Chiudi chiamata">📞</button>
+          <button type="button" class="dc-btn dc-vcall-ctrl" id="vcall-toggle-audio" title="Microfono" aria-label="Mute/Unmute">Mic</button>
+          <button type="button" class="dc-btn dc-vcall-ctrl" id="vcall-toggle-video" title="Videocamera" aria-label="Attiva/Disattiva video">Cam</button>
+          <button type="button" class="dc-btn dc-vcall-hangup" id="vcall-hangup" title="Chiudi chiamata" aria-label="Chiudi chiamata">End</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Toast container -->
   <div id="toast-container" class="dc-toast-container" aria-live="polite"></div>
 
   <script src="/static/js/chat.js?v=9"></script>
