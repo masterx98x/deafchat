@@ -1,11 +1,10 @@
 import { Link } from 'react-router-dom';
 
 const navItems = [
-  { href: 'https://www.deafsuite.it/', label: 'DeafSuite' },
   { href: 'https://deafnews.it/', label: 'DeafNews' },
 ];
 
-export default function BrandHeader() {
+export default function BrandHeader({ deafSuiteHref, onDeafSuiteNavigate, onDeafSuiteWarm }) {
   return (
     <header className="dc-site-header">
       <div className="dc-shell dc-site-header__inner">
@@ -20,6 +19,16 @@ export default function BrandHeader() {
 
         <div className="dc-site-header__actions">
           <nav className="dc-nav-primary" aria-label="Navigazione esterna">
+            <a
+              className="dc-nav-pill"
+              href={deafSuiteHref}
+              onClick={onDeafSuiteNavigate}
+              onMouseEnter={onDeafSuiteWarm}
+              onFocus={onDeafSuiteWarm}
+              onTouchStart={onDeafSuiteWarm}
+            >
+              DeafSuite
+            </a>
             {navItems.map((item) => (
               <a
                 key={item.href}

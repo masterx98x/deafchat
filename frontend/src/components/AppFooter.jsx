@@ -1,4 +1,4 @@
-export default function AppFooter() {
+export default function AppFooter({ deafSuiteHref, onDeafSuiteNavigate, onDeafSuiteWarm }) {
   return (
     <footer className="dc-site-footer">
       <div className="dc-shell dc-site-footer__inner">
@@ -7,7 +7,13 @@ export default function AppFooter() {
           comunicazioni temporanee, private e orientate alla privacy.
         </p>
         <div className="dc-site-footer__nav">
-          <a href="https://www.deafsuite.it/" target="_blank" rel="noreferrer noopener">
+          <a
+            href={deafSuiteHref}
+            onClick={onDeafSuiteNavigate}
+            onMouseEnter={onDeafSuiteWarm}
+            onFocus={onDeafSuiteWarm}
+            onTouchStart={onDeafSuiteWarm}
+          >
             DeafSuite
           </a>
           <a href="https://deafnews.it/" target="_blank" rel="noreferrer noopener">
