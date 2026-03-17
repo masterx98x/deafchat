@@ -1,6 +1,5 @@
 import { startTransition, useEffect, useState } from 'react';
 import FaqSection from '../components/FaqSection';
-import EcosystemCtaSection from '../components/EcosystemCtaSection';
 import FeatureGrid from '../components/FeatureGrid';
 import RoomCreatorCard from '../components/RoomCreatorCard';
 import SectionHeader from '../components/SectionHeader';
@@ -77,13 +76,7 @@ const initialForm = {
   expiryMinutes: 30,
 };
 
-export default function HomePage({
-  deafSuiteHref,
-  onDeafSuiteNavigate,
-  onDeafSuiteWarm,
-  deafNewsHref,
-  onDeafNewsWarm,
-}) {
+export default function HomePage() {
   const [form, setForm] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -233,15 +226,6 @@ export default function HomePage({
           />
           <FeatureGrid items={processItems} variant="process" />
         </section>
-
-        <EcosystemCtaSection
-          deafSuiteHref={deafSuiteHref}
-          onDeafSuiteNavigate={onDeafSuiteNavigate}
-          onDeafSuiteWarm={onDeafSuiteWarm}
-          deafNewsHref={deafNewsHref}
-          onDeafNewsWarm={onDeafNewsWarm}
-        />
-
         <section className="dc-section">
           <SectionHeader
             eyebrow="FAQ"

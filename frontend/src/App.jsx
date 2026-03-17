@@ -155,21 +155,16 @@ function AppFrame() {
       isArriving={Boolean(arrivalSource)}
     >
       {!isChatRoute ? (
-        <BrandHeader />
+        <BrandHeader
+          deafSuiteHref={DEAFSUITE_ENTRY_URL}
+          deafNewsHref={DEAFNEWS_ENTRY_URL}
+          onDeafSuiteNavigate={handleDeafSuiteNavigate}
+          onDeafSuiteWarm={ensureDeafSuiteWarm}
+          onDeafNewsWarm={ensureDeafNewsWarm}
+        />
       ) : null}
       <Routes>
-        <Route
-          path="/"
-          element={
-            <HomePage
-              deafSuiteHref={DEAFSUITE_ENTRY_URL}
-              onDeafSuiteNavigate={handleDeafSuiteNavigate}
-              onDeafSuiteWarm={ensureDeafSuiteWarm}
-              deafNewsHref={DEAFNEWS_ENTRY_URL}
-              onDeafNewsWarm={ensureDeafNewsWarm}
-            />
-          }
-        />
+        <Route path="/" element={<HomePage />} />
         <Route path="/chat/:roomId" element={<ChatPage />} />
       </Routes>
       {!isChatRoute ? (
