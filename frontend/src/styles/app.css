@@ -989,7 +989,8 @@
 }
 
 .deafsuite-link-cta-shell,
-.deafnews-cta-shell {
+.deafnews-cta-shell,
+.deafmail-cta-shell {
   width: min(1360px, calc(100% - 1rem));
   margin-inline: auto;
   opacity: 0;
@@ -1008,13 +1009,19 @@
   margin-top: 0.8rem;
 }
 
+.deafmail-cta-shell {
+  margin-top: 0.8rem;
+}
+
 .deafsuite-link-cta-shell.is-ready,
-.deafnews-cta-shell.is-ready {
+.deafnews-cta-shell.is-ready,
+.deafmail-cta-shell.is-ready {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
 
-.deafnews-cta-shell.is-leaving {
+.deafnews-cta-shell.is-leaving,
+.deafmail-cta-shell.is-leaving {
   opacity: 0;
   transform: translateY(-8px) scale(0.985);
   filter: blur(2px);
@@ -3538,13 +3545,15 @@
   }
 
   .deafsuite-link-cta-shell,
-  .deafnews-cta-shell {
+  .deafnews-cta-shell,
+  .deafmail-cta-shell {
     width: min(100%, calc(100% - 0.7rem));
     margin-top: 0.7rem;
   }
 
   .deafsuite-link-cta-content,
-  .deafnews-cta-content {
+  .deafnews-cta-content,
+  .deafmail-cta-content {
     min-height: unset;
     padding: 0.95rem;
     flex-direction: column;
@@ -3552,24 +3561,28 @@
   }
 
   .deafsuite-link-cta-brand,
-  .deafnews-cta-brand {
+  .deafnews-cta-brand,
+  .deafmail-cta-brand {
     gap: 0.8rem;
   }
 
   .deafsuite-link-cta-logo-wrap,
-  .deafnews-cta-logo-wrap {
+  .deafnews-cta-logo-wrap,
+  .deafmail-cta-logo-wrap {
     width: 52px;
     height: 52px;
   }
 
   .deafsuite-link-cta-logo,
-  .deafnews-cta-logo {
+  .deafnews-cta-logo,
+  .deafmail-cta-icon {
     width: 38px;
     height: 38px;
   }
 
   .deafsuite-link-cta-side,
-  .deafnews-cta-side {
+  .deafnews-cta-side,
+  .deafmail-cta-side {
     justify-content: space-between;
   }
 
@@ -3630,9 +3643,12 @@
 @media (hover: none), (pointer: coarse) {
   .deafsuite-link-cta-shell,
   .deafnews-cta-shell,
+  .deafmail-cta-shell,
   .deafsuite-link-cta-shell.is-ready,
   .deafnews-cta-shell.is-ready,
-  .deafnews-cta-shell.is-leaving {
+  .deafmail-cta-shell.is-ready,
+  .deafnews-cta-shell.is-leaving,
+  .deafmail-cta-shell.is-leaving {
     transform: none;
     filter: none;
     transition: opacity 0.2s ease;
