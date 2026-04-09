@@ -10,6 +10,7 @@ import HomePage from './pages/HomePage';
 
 const DEAFSUITE_ENTRY_URL = 'https://www.deafsuite.it/?from=deafchat';
 const DEAFNEWS_ENTRY_URL = 'https://deafnews.it/?from=deafchat';
+const DEAFMAIL_ENTRY_URL = 'https://deafmail.deafsuite.it/?from=deafchat';
 
 function consumeInboundSource(expectedSource) {
   if (typeof window === 'undefined') {
@@ -61,6 +62,7 @@ function AppFrame() {
         <ProjectCtaStack
           deafSuiteHref={DEAFSUITE_ENTRY_URL}
           deafNewsHref={DEAFNEWS_ENTRY_URL}
+          deafMailHref={DEAFMAIL_ENTRY_URL}
         />
       ) : null}
       <Routes>

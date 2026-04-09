@@ -16,6 +16,9 @@ export default function AppFooter({
           <a href={deafNewsHref}>
             DeafNews
           </a>
+          <a href="https://deafmail.deafsuite.it/?from=deafchat">
+            DeafMail
+          </a>
         </div>
       </div>
     </footer>

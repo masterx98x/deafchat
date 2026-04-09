@@ -46,7 +46,8 @@
 }
 
 .deafsuite-link-cta-lite,
-.deafnews-cta-lite {
+.deafnews-cta-lite,
+.deafmail-cta-lite {
   animation: none !important;
   contain: layout paint;
 }
@@ -65,13 +66,22 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
+.deafmail-cta-lite {
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.24),
+    0 8px 20px rgba(0, 80, 74, 0.12),
+    inset 0 1px 0 rgba(0, 220, 200, 0.05);
+}
+
 .deafsuite-link-cta-lite:hover,
-.deafnews-cta-lite:hover {
+.deafnews-cta-lite:hover,
+.deafmail-cta-lite:hover {
   transform: translateY(-1px);
 }
 
 .deafsuite-link-cta-lite .deafsuite-link-cta-content,
-.deafnews-cta-lite .deafnews-cta-content {
+.deafnews-cta-lite .deafnews-cta-content,
+.deafmail-cta-lite .deafmail-cta-content {
   min-height: 108px;
 }
 
@@ -264,7 +274,9 @@
   .deafsuite-link-cta-lite .deafsuite-link-cta-grid,
   .deafsuite-link-cta-lite .deafsuite-link-cta-line,
   .deafnews-cta-lite .deafnews-cta-grid,
-  .deafnews-cta-lite .deafnews-cta-energy {
+  .deafnews-cta-lite .deafnews-cta-energy,
+  .deafmail-cta-lite .deafmail-cta-grid,
+  .deafmail-cta-lite .deafmail-cta-line {
     display: none;
   }
 
@@ -278,7 +290,8 @@
   .dc-background--lite .dc-background__particle,
   .deafsuite-link-cta-lite .deafsuite-link-cta-code,
   .deafsuite-link-cta-lite .deafsuite-link-cta-line,
-  .deafnews-cta-lite .deafnews-cta-energy {
+  .deafnews-cta-lite .deafnews-cta-energy,
+  .deafmail-cta-lite .deafmail-cta-line {
     animation: none !important;
   }
 }
@@ -1420,6 +1433,234 @@
   width: 38%;
   animation-delay: -3.1s;
 }
+
+/* ============================================================
+   DeafMail CTA Banner
+   ============================================================ */
+
+.deafmail-cta {
+  display: block;
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(0, 196, 180, 0.16);
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, rgba(11, 11, 15, 0.98), rgba(10, 18, 20, 0.98) 46%, rgba(11, 20, 22, 0.98) 100%);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.34),
+    0 10px 32px rgba(0, 100, 90, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: #f6f7fb;
+  cursor: pointer;
+  isolation: isolate;
+  padding: 0;
+  transform: translateZ(0);
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.32s ease,
+    border-color 0.32s ease;
+  text-decoration: none;
+}
+
+.deafmail-cta:hover {
+  transform: translateY(-2px) scale(1.003);
+  border-color: rgba(0, 196, 180, 0.3);
+  box-shadow:
+    0 28px 84px rgba(0, 0, 0, 0.42),
+    0 0 40px rgba(0, 196, 180, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.deafmail-cta:active {
+  transform: scale(0.992);
+}
+
+.deafmail-cta-backdrop,
+.deafmail-cta-grid,
+.deafmail-cta-orb,
+.deafmail-cta-line {
+  position: absolute;
+  pointer-events: none;
+}
+
+.deafmail-cta-backdrop {
+  inset: 0;
+  background:
+    radial-gradient(circle at 14% 26%, rgba(0, 196, 180, 0.12), transparent 30%),
+    radial-gradient(circle at 76% 28%, rgba(0, 220, 200, 0.08), transparent 28%),
+    radial-gradient(circle at 52% 96%, rgba(0, 196, 180, 0.06), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 42%);
+  z-index: -4;
+}
+
+.deafmail-cta-grid {
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 30px 30px;
+  mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+  opacity: 0.14;
+  z-index: -3;
+}
+
+.deafmail-cta-orb {
+  border-radius: 999px;
+  filter: blur(30px);
+  mix-blend-mode: screen;
+  z-index: -1;
+  transition: opacity 0.32s ease, transform 0.32s ease;
+}
+
+.deafmail-cta-orb-a {
+  top: -130%;
+  left: -10%;
+  width: 38rem;
+  height: 38rem;
+  background:
+    radial-gradient(circle, rgba(0, 220, 200, 0.22) 0%, rgba(0, 196, 180, 0.16) 30%, rgba(0, 196, 180, 0.07) 54%, transparent 78%);
+  opacity: 0.52;
+}
+
+.deafmail-cta-orb-b {
+  top: -82%;
+  right: -8%;
+  width: 31rem;
+  height: 31rem;
+  background:
+    radial-gradient(circle, rgba(0, 210, 190, 0.16) 0%, rgba(0, 196, 180, 0.10) 32%, rgba(0, 196, 180, 0.04) 56%, transparent 80%);
+  opacity: 0.42;
+}
+
+.deafmail-cta-line {
+  height: 1px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(0, 220, 200, 0.7), transparent);
+  box-shadow: 0 0 18px rgba(0, 196, 180, 0.2);
+  z-index: -1;
+  opacity: 0.45;
+  animation: deafmail-line-scan 8s linear infinite;
+}
+
+.deafmail-cta-line-a {
+  top: 28%;
+  left: -10%;
+  width: 48%;
+}
+
+@keyframes deafmail-line-scan {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(130%); }
+}
+
+.deafmail-cta-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 108px;
+  padding: 1rem 1.2rem;
+}
+
+.deafmail-cta-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.deafmail-cta-logo-wrap {
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(145deg, rgba(0, 196, 180, 0.16), rgba(0, 196, 180, 0.05)),
+    rgba(15, 14, 22, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.28),
+    0 0 20px rgba(0, 196, 180, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.deafmail-cta-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.deafmail-cta-brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.deafmail-cta-kicker {
+  color: #7febe2;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.deafmail-cta-title {
+  color: #ffffff;
+  font-size: clamp(1.02rem, 2vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+}
+
+.deafmail-cta-side {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: 0 0 auto;
+}
+
+.deafmail-cta-chip {
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 196, 180, 0.2);
+  background: rgba(0, 196, 180, 0.1);
+  color: #ccf7f3;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.deafmail-cta-arrow {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, rgba(0, 200, 185, 0.92), rgba(0, 150, 138, 0.82));
+  border: 1px solid rgba(0, 220, 200, 0.24);
+  color: #ffffff;
+  font-size: 1.25rem;
+  box-shadow:
+    0 10px 24px rgba(0, 100, 90, 0.26),
+    0 0 18px rgba(0, 196, 180, 0.18);
+  transition: transform 0.28s ease, box-shadow 0.28s ease, background 0.28s ease;
+}
+
+.deafmail-cta:hover .deafmail-cta-arrow {
+  transform: translate3d(2px, -2px, 0);
+  background: linear-gradient(145deg, rgba(0, 220, 200, 0.98), rgba(0, 170, 155, 0.9));
+  box-shadow:
+    0 14px 34px rgba(0, 110, 100, 0.3),
+    0 0 22px rgba(0, 196, 180, 0.22);
+}
+
+.deafmail-cta:hover .deafmail-cta-orb-a { opacity: 0.6; }
+.deafmail-cta:hover .deafmail-cta-orb-b { opacity: 0.5; }
 
 .matrix-rain-background {
   position: absolute;
