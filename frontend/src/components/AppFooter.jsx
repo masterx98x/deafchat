@@ -1,6 +1,7 @@
 export default function AppFooter({
   deafSuiteHref,
   deafNewsHref,
+  deafScanHref,
 }) {
   return (
     <footer className="dc-site-footer">
@@ -18,6 +19,9 @@ export default function AppFooter({
           </a>
           <a href="https://deafmail.deafsuite.it/?from=deafchat">
             DeafMail
+          </a>
+          <a href={deafScanHref}>
+            DeafScan
           </a>
         </div>
       </div>

@@ -11,6 +11,7 @@ import HomePage from './pages/HomePage';
 const DEAFSUITE_ENTRY_URL = 'https://www.deafsuite.it/?from=deafchat';
 const DEAFNEWS_ENTRY_URL = 'https://deafnews.it/?from=deafchat';
 const DEAFMAIL_ENTRY_URL = 'https://deafmail.deafsuite.it/?from=deafchat';
+const DEAFSCAN_ENTRY_URL = 'https://deafscan.deafsuite.it/?from=deafchat';
 
 function consumeInboundSource(expectedSource) {
   if (typeof window === 'undefined') {
@@ -37,7 +38,7 @@ function AppFrame() {
   const [arrivalSource, setArrivalSource] = useState(null);
 
   useEffect(() => {
-    const inboundSource = consumeInboundSource(['deafsuite', 'deafnews']);
+    const inboundSource = consumeInboundSource(['deafsuite', 'deafnews', 'deafscan']);
     if (!inboundSource) {
       return undefined;
     }
@@ -50,7 +51,11 @@ function AppFrame() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  const arrivalSourceLabel = arrivalSource === 'deafnews' ? 'DeafNews' : 'DeafSuite';
+  const arrivalSourceLabel = {
+    deafnews: 'DeafNews',
+    deafsuite: 'DeafSuite',
+    deafscan: 'DeafScan',
+  }[arrivalSource] || 'DeafSuite';
 
   return (
     <AppShell
@@ -73,6 +78,7 @@ function AppFrame() {
         <AppFooter
           deafSuiteHref={DEAFSUITE_ENTRY_URL}
           deafNewsHref={DEAFNEWS_ENTRY_URL}
+          deafScanHref={DEAFSCAN_ENTRY_URL}
         />
       ) : null}
     </AppShell>
